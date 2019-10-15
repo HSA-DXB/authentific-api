@@ -1,0 +1,34 @@
+{
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  },
+  "mysql": {
+    "host": "mysqlDb",
+    "port": 3306,
+    "database": "LOOPBACKdevdb",
+    "password": "LOOPBACKdevpwd",
+    "name": "mysql",
+    "connector": "mysql",
+    "user": "LOOPBACKdevuser"
+  },
+  "myEmailDatasource": {
+    "name": "myEmailDatasource",
+    "transports": [
+      {
+        "type": "smtp",
+        "host": "smtp.sendgrid.net",
+        "secure": false,
+        "port": 587,
+        "tls": {
+          "rejectUnauthorized": false
+        },
+        "auth": {
+          "user": "apikey",
+          "pass": "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"
+        }
+      }
+    ],
+    "connector": "mail"
+  }
+}

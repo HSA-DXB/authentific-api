@@ -1,0 +1,86 @@
+{
+  "_meta": {
+    "sources": [
+      "loopback/common/models",
+      "loopback/server/models",
+      "../common/models",
+      "./models"
+    ],
+    "mixins": [
+      "loopback/common/mixins",
+      "../node_modules/loopback-ds-timestamp-mixin",
+      "loopback/server/mixins",
+      "../common/mixins",
+      "./mixins"
+    ]
+  },
+  "AccessToken": {
+    "dataSource": "mysql",
+    "public": false
+  },
+  "ACL": {
+    "dataSource": "mysql",
+    "public": false
+  },
+  "RoleMapping": {
+    "dataSource": "mysql",
+    "public": false,
+    "options": {
+      "strictObjectIDCoercion": true
+    }
+  },
+  "Role": {
+    "dataSource": "mysql",
+    "public": false
+  },
+  "Email": {
+    "dataSource": "myEmailDatasource"
+  },
+  "Institute": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "Certification": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "Staff": {
+    "dataSource": "mysql"
+  },
+  "StaffCategory": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "Candidate": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "Certificate": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "Paper": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "BluePrint": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "StaffCertification": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "ActivityLog": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "Approval": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "NFCTag": {
+    "dataSource": "mysql",
+    "public": true
+  }
+}

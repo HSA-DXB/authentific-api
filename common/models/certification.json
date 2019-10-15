@@ -1,0 +1,63 @@
+{
+  "name": "Certification",
+  "plural": "Certifications",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": true
+  },
+  "properties": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "level": {
+      "type": "number",
+      "required": true,
+      "default": "1"
+    },
+    "startDate": {
+      "type": "date",
+      "required": true
+    },
+    "endDate": {
+      "type": "date",
+      "required": true
+    },
+    "details": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "certificates": {
+      "type": "hasMany",
+      "model": "Certificate",
+      "foreignKey": "certificationId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "staff": {
+      "type": "hasMany",
+      "model": "Staff",
+      "foreignKey": "certificationId",
+      "options": {
+        "nestRemoting": true
+      },
+      "through": "StaffCertification"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

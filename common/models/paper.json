@@ -1,0 +1,43 @@
+{
+  "name": "Paper",
+  "plural": "Paper",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": true
+  },
+  "properties": {
+    "identifier": {
+      "type": "string",
+      "defaultFn": "guid"
+    },
+    "batchId": {
+      "type": "string"
+    },
+    "isDamaged": {
+      "type": "Boolean"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "certificate": {
+      "type": "hasOne",
+      "model": "Certificate",
+      "foreignKey": "paperId",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

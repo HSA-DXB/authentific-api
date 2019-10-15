@@ -1,0 +1,44 @@
+{
+  "name": "Candidate",
+  "plural": "Candidates",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": true
+  },
+  "properties": {
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "lastName": {
+      "type": "string",
+      "required": true
+    },
+    "rollNumber": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "certificates": {
+      "type": "hasMany",
+      "model": "Certificate",
+      "foreignKey": "candidateId",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

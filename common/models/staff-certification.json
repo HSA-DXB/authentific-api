@@ -1,0 +1,34 @@
+{
+  "name": "StaffCertification",
+  "plural": "StaffCertifications",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "staff": {
+      "type": "belongsTo",
+      "model": "Staff",
+      "foreignKey": "staffId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "certification": {
+      "type": "belongsTo",
+      "model": "Certification",
+      "foreignKey": "certificationId",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

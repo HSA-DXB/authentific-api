@@ -1,0 +1,27 @@
+{
+  "name": "NFCTag",
+  "plural": "NFCTags",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "batchId": {
+      "type": "string",
+      "required": true
+    },
+    "identifier": {
+      "type": "string",
+      "required": true,
+      "defaultFn": "guid"
+    },
+    "isDamaged": {
+      "type": "Boolean"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

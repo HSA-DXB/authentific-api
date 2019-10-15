@@ -1,0 +1,140 @@
+{
+  "name": "Institute",
+  "plural": "Institutes",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "levels": {
+      "type": "number"
+    },
+    "city": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "principalContact": {
+      "type": "string",
+      "default": ""
+    },
+    "logo": {
+      "type": "string",
+      "default": ""
+    },
+    "timeZoneRegion": {
+      "type": "string",
+      "default": ""
+    },
+    "font": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "validations": [],
+  "relations": {
+    "certifications": {
+      "type": "hasMany",
+      "model": "Certification",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "certificates": {
+      "type": "hasMany",
+      "model": "Certificate",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "paper": {
+      "type": "hasMany",
+      "model": "Paper",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "staffCategories": {
+      "type": "hasMany",
+      "model": "StaffCategory",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "staff": {
+      "type": "hasMany",
+      "model": "Staff",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "candidates": {
+      "type": "hasMany",
+      "model": "Candidate",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "bluePrints": {
+      "type": "hasMany",
+      "model": "BluePrint",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "staffCertifications": {
+      "type": "hasMany",
+      "model": "StaffCertification",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "approvals": {
+      "type": "hasMany",
+      "model": "Approval",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "NFCTags": {
+      "type": "hasMany",
+      "model": "NFCTag",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

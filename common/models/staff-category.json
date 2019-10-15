@@ -1,0 +1,45 @@
+{
+  "name": "StaffCategory",
+  "plural": "StaffCategories",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": true
+  },
+  "properties": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "permissions": {
+      "type": "Object",
+      "required": true
+    },
+    "level": {
+      "type": "number",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "staff": {
+      "type": "hasMany",
+      "model": "Staff",
+      "foreignKey": "staffCategoryId",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

@@ -1,0 +1,76 @@
+{
+  "name": "Certificate",
+  "plural": "Certificates",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": true
+  },
+  "properties": {
+    "verificationUrl": {
+      "type": "string",
+      "required": false
+    },
+    "serial": {
+      "type": "string",
+      "required": false
+    },
+    "pin": {
+      "type": "string",
+      "required": false
+    },
+    "identifier": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "approvals": {
+      "type": "hasMany",
+      "model": "Staff",
+      "foreignKey": "certificatedId",
+      "options": {
+        "nestRemoting": true
+      },
+      "through": "Approval"
+    },
+    "candidate": {
+      "type": "belongsTo",
+      "model": "Candidate",
+      "foreignKey": "candidateId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "certification": {
+      "type": "belongsTo",
+      "model": "Certification",
+      "foreignKey": "certificationId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "institute": {
+      "type": "belongsTo",
+      "model": "Institute",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}
