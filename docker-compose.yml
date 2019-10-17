@@ -20,6 +20,9 @@ services:
     command: nodemon --ignore 'client/' .
 
     restart: always
+    
+    depends_on:
+      - mysqlDb
     # degug command
     # command: nodemon --ignore 'client/' -L --inspect ./server
 
@@ -34,7 +37,7 @@ services:
       MYSQL_PASSWORD: "${DB_PWD}"
     # default MySQL port
     ports:
-      - 3306:3306
+      - 3307:3307
     # create and map separate volume
     volumes:
       - loopbackDev:/var/lib/mysql
@@ -45,6 +48,8 @@ services:
       - api
       ports:
       - '8080:8080'
+      depends_on:
+        - api
 
 # volumes
 volumes:
