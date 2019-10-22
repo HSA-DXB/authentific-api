@@ -82,5 +82,13 @@
   "NFCTag": {
     "dataSource": "mysql",
     "public": true
+  },
+  "Attachment": {
+    "dataSource": "storage",
+    "public": true
+  },
+  "Verification": {
+    "dataSource": "mysql",
+    "public": true
   }
 }

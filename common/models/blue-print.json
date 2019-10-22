@@ -14,8 +14,52 @@
       "type": "array",
       "required": false
     },
+    "isFirstEdit": {
+      "type": "Boolean",
+      "required": false,
+      "default": true
+    },
+    "isArchived": {
+      "type": "Boolean",
+      "required": false,
+      "default": false
+    },
+    "isStockSerialized": {
+      "type": "Boolean",
+      "required": false,
+      "default": true
+    },
     "title": {
       "type": "string",
+      "required": true
+    },
+    "orientation": {
+      "type": "string",
+      "required": false
+    },
+    "size": {
+      "type": "string",
+      "required": false
+    },
+    "quality": {
+      "type": "string",
+      "required": false
+    },
+    "template": {
+      "type": "array",
+      "required": false,
+      "mysql": {
+        "columnName": "Template",
+        "dataType": "LONGTEXT",
+        "nullable": "N"
+      }
+    },
+    "googleFonts": {
+      "type": "string",
+      "required": false
+    },
+    "printBackground": {
+      "type": "Boolean",
       "required": false
     }
   },

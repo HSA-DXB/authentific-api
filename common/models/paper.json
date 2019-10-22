@@ -18,7 +18,8 @@
       "type": "string"
     },
     "isDamaged": {
-      "type": "Boolean"
+      "type": "Boolean",
+      "default": false
     }
   },
   "validations": [],

@@ -16,9 +16,16 @@
     },
     "lastName": {
       "type": "string",
-      "required": true
+      "required": false
+    },
+    "dp": {
+      "type": "string",
+      "required": false
     },
     "rollNumber": {
+      "type": "string"
+    },
+    "registrationNumber": {
       "type": "string"
     }
   },

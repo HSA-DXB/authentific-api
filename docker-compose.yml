@@ -20,7 +20,7 @@ services:
     command: nodemon --ignore 'client/' .
 
     restart: always
-    
+
     depends_on:
       - mysqlDb
     # degug command

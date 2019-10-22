@@ -14,9 +14,16 @@
       "type": "string",
       "required": false
     },
-    "serial": {
-      "type": "string",
-      "required": false
+    "isApproved": {
+      "type": "Boolean"
+    },
+    "isVoid": {
+      "type": "Boolean",
+      "default": false
+    },
+    "isPrinted": {
+      "type": "Boolean",
+      "default": false
     },
     "pin": {
       "type": "string",
@@ -25,8 +32,18 @@
     "identifier": {
       "type": "string"
     },
-    "status": {
-      "type": "string"
+    "print": {
+      "type": "string",
+      "required": false,
+      "mysql": {
+        "columnName": "Template",
+        "dataType": "LONGTEXT",
+        "nullable": "N"
+      }
+    },
+    "googleFonts": {
+      "type": "string",
+      "required": false
     }
   },
   "validations": [],
@@ -60,6 +77,14 @@
       "type": "belongsTo",
       "model": "Institute",
       "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "verifications": {
+      "type": "hasMany",
+      "model": "Verification",
+      "foreignKey": "",
       "options": {
         "nestRemoting": true
       }

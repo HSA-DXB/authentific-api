@@ -2,8 +2,17 @@
 
 var loopback = require('loopback');
 var boot = require('loopback-boot');
-
+var bodyParser = require('body-parser');
+var UAParser = require('ua-parser-js');
+const publicIp = require('public-ip');
+const awaitableCallback = require('../common/awaitableCallback');
+const resolvePromise = require('../common/ResolvePromise');
 var app = module.exports = loopback();
+
+
+var bodyParser = require('body-parser');
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 1000000}));
 
 app.start = function () {
     // start the web server
@@ -17,8 +26,10 @@ app.start = function () {
         }
     });
 };
+
+
 // Retrieve the currently authenticated user
-app.use(function (req, res, next) {
+app.use(async function (req, res, next) {
     // First, get the access token, either from the url or from the headers
     var tokenId = false;
     if (req.query && req.query.access_token) {
@@ -42,13 +53,65 @@ app.use(function (req, res, next) {
             if (!accessToken) return next(new Error('could not find accessToken'));
 
             // Look up the user associated with the accessToken
-            UserModel.findById(accessToken.userId, function (err, user) {
+
+            // dont worry that we are getting so much data, i.e certificates etc.
+            // they are just promise functions, not actual data is returned until the promise is resolved
+            UserModel.findById(accessToken.userId, {include: ['staffCategory', {certifications: [{certificates: ['candidate', 'approvals', 'certification']}]}]}, function (err, user) {
                 if (err) return next(err);
                 if (!user) return next(new Error('could not find a valid user'));
 
 
                 req['currentUser'] = user;
 
+
+                let activity = {};
+
+
+                let urlSplits = req.originalUrl.split('?')[0].split('/');
+
+                activity['staffId'] = user.id;
+                // activity['table'] = req;
+
+                activity['instituteId'] = user.instituteId;
+                const parser = new UAParser(req.headers['user-agent']);
+
+
+                activity['os'] = parser.getOS().name;
+
+                activity['browser'] = parser.getBrowser().name;
+
+
+                publicIp.v4().then(async ip => {
+                    activity['ip'] = ip;
+
+
+                    let u1 = urlSplits[2];
+                    let u2 = urlSplits[3];
+                    let u3 = urlSplits[4];
+                    let u4 = urlSplits[5];
+
+
+                    if (u3) {
+                        activity['table'] = u3;
+                        if (u4) {
+                            activity['row'] = u4;
+                        }
+
+                    } else if (u1) {
+                        activity['table'] = u1;
+                        if (u2) {
+                            activity['row'] = u2;
+                        }
+                    }
+
+
+                    activity['action'] = req.method;
+
+
+                    let savedActivity = await app.models.ActivityLog.create(activity);
+                    // console.log('user', req.currentUser.certifications)
+
+                });
 
                 next();
             });
@@ -61,47 +124,151 @@ app.use(function (req, res, next) {
         next();
     }
 });
-app.use('/api/getwaitingformyapproval', function (req, res) {
-    // console.log('request received', req.currentUser)
-    app.models.Approval.find({
-        where: {
-            staffId: {neq: req.currentUser.id},
-            instituteId: req.currentUser.instituteId
-        }
-    }, (err, waitingForApproval) => {
-        app.models.Approval.find({
-            where: {
-                staffId: req.currentUser.id,
-                instituteId: req.currentUser.instituteId
-            }
-        }, (err, approvedByMe) => {
-            let approvalsToPassOn = []
-            waitingForApproval.forEach(approval => {
+app.use('/api/getwaitingformyapproval', async function (req, res) {
 
-                if (!approvedByMe.find(x => x.certificateId === approval.certificateId)) {
-                    approvalsToPassOn.push(approval);
+
+    let result = [];
+    //certificates that i approved but are still not approved
+    console.clear()
+    let certifications = await awaitableCallback(req.currentUser.certifications);
+
+
+    for (const certification of certifications) {
+
+
+        const certificates = await awaitableCallback(certification.certificates);
+        console.log(certificates);
+        for (const certificate of certificates) {
+
+            if (!certificate.isApproved) {
+                const approvedByMe = (await resolvePromise(await app.models.Approval.find({
+
+                    where: {certificateId: certificate.id, staffId: req.currentUser.id}
+
+                })));
+
+                if (!approvedByMe || approvedByMe.length < 1) {
+
+                    result.push(certificate);
+                }
+
+                console.log('is approved by me', approvedByMe.length < 1);
+
+
+            }
+
+
+        }
+
+    }
+
+    res.status(200).send(result);
+
+
+});
+
+
+async function handleCertificates(approvals, req, res) {
+
+
+    if (!approvals || approvals.length < 1) {
+        console.log('No certificates');
+        res.status(204).send({err: 'No Content.'});
+        return;
+    }
+
+    let result = [];
+    let index = 1;
+    try {
+        approvals.forEach(async approval => {
+            let tempApproval1 = Object.assign({}, approval).__data;
+
+
+            let certificate = await resolvePromise(await app.models.Approval.relations.certificate.modelTo.findById(approval.certificateId));
+
+
+            tempApproval1['certificate'] = certificate;
+            if (tempApproval1.certificate !== null) {
+
+
+                let candidate = await resolvePromise(await app.models.Certificate.relations.candidate.modelTo.findById(tempApproval1.certificate.candidateId));
+                {
+
+                    let tempApproval2 = Object.assign({}, tempApproval1)
+
+
+                    tempApproval2['candidate'] = candidate;
+
+
+                    let certification = await resolvePromise(await app.models.Certificate.relations.certification.modelTo.findById(tempApproval2.certificate.certificationId));
+                    let tempApproval3 = Object.assign({}, tempApproval2)
+                    tempApproval3['certification'] = certification;
+
+                    result.push(tempApproval3)
+
+                    if (index === approvals.length) {
+
+                        res.status(200).send(result);
+                        return;
+
+                    }
+                    index += 1;
+
+
+                }
+            }
+        });
+    } catch (e) {
+        console.log('Exception', e)
+        res.status(501).send(e)
+    }
+
+}
+
+
+app.use('/api/pendingapprovalbyothers', async function (req, res) {
+
+        let result = [];
+        //certificates that i approved but are still not approved
+        console.clear()
+        let certifications = await awaitableCallback(req.currentUser.certifications);
+
+
+        for (const certification of certifications) {
+
+
+            // for (const certificate of certification.certificates) {
+
+            const certificates = await awaitableCallback(certification.certificates);
+
+            for (const certificate of certificates) {
+
+                if (!certificate.isApproved) {
+                    const approvedByMe = (await resolvePromise(await app.models.Approval.find({
+
+                        where: {certificateId: certificate.id, staffId: req.currentUser.id}
+
+                    })));
+
+                    if (approvedByMe.length > 0) {
+
+                        result.push(certificate);
+                    }
+
+                    console.log('is approved by me', approvedByMe.length > 0);
+
+                    // console.log('approvals', await resolvePromise(await app.models.Approval.find({certificateId: certificate.id})));
 
                 }
 
-            })
-            handleCertificates(err, approvalsToPassOn, req, res)
-        })
+                // }
+            }
 
-
-    })
-});
-
-app.use('/api/getapprovedbyme', function (req, res) {
-    // console.log('request received', req.currentUser)
-    app.models.Approval.find({
-        where: {
-            staffId: req.currentUser.id,
-            instituteId: req.currentUser.instituteId
         }
-    }, (err, approvals) => {
-        handleCertificates(err, approvals, req, res)
-    })
-});
+
+        res.status(200).send(result);
+    }
+);
 
 
 // Bootstrap the application, configure models, datasources and middleware.
@@ -115,103 +282,3 @@ boot(app, __dirname, function (err) {
         app.start();
 });
 
-function handleCertificates(err, approvals, req, res) {
-
-    console.log('approvals', approvals)
-
-
-    if (approvals.length < 1) {
-        console.log('returning a 204')
-        res.status(204).send({err: 'No Content.'});
-        return;
-    }
-
-    let result = [];
-    let index = 1;
-    approvals.forEach(approval => {
-        let tempApproval1 = Object.assign({}, approval).__data;
-
-
-        app.models.Approval.relations.certificate.modelTo.findById(approval.certificateId, (err, certificate) => {
-            if (err) {
-                console.log('error while getting certificates', err)
-                res.status(404).send(err)
-            }
-
-
-            tempApproval1['certificate'] = certificate;
-            if (tempApproval1.certificate !== null) {
-
-
-                app.models.Certificate.relations.candidate.modelTo.findById(tempApproval1.certificate.candidateId, (err, candidate) => {
-
-                    let tempApproval2 = Object.assign({}, tempApproval1)
-
-
-                    tempApproval2['candidate'] = candidate;
-
-
-                    app.models.Certificate.relations.certification.modelTo.findById(tempApproval2.certificate.certificationId, (err, certification) => {
-                        let tempApproval3 = Object.assign({}, tempApproval2)
-                        tempApproval3['certification'] = certification;
-
-                        result.push(tempApproval3)
-
-                        if (index === approvals.length) {
-
-                            res.status(200).send(result);
-                            return;
-
-                        }
-                        index += 1;
-
-                    });
-
-
-                })
-            } else {
-                if (index === approvals.length) {
-
-                    res.status(204).send({err:'No Content.'});
-                    return;
-
-                }
-                index += 1;
-
-
-            }
-
-        });
-
-    });
-
-    // if (err != null) {
-    //     res.status(404).send(err);
-    //
-    //     return
-    // }
-
-
-}
-
-//
-// app.post('/api/generatecertificate', async function (req, res) {
-//     try {
-//         await app.dataSources.db.transaction(async models => {
-//             const {Certificate} = models;
-//             const {Approval} = models;
-//             console.log(await Certificate.count()); // 0
-//             let resultCertificate = await Certificate.create(req.body);
-//             console.log(resultCertificate); // 1
-//             console.log(await Certificate.count()); // 1
-//             await Approval.create({
-//                 staffId: req.currentUser.id,
-//                 certificateId: resultCertificate.id, instituteId: resultCertificate.instituteId
-//             });
-//             res.status(200).send(resultCertificate);
-//         });
-//     } catch (e) {
-//         console.log(e); // Oops
-//         res.status(500).send(e);
-//     }
-// });

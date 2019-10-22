@@ -14,6 +14,14 @@
       "type": "string",
       "required": true
     },
+    "candidateSchema": {
+      "type": "array",
+      "required": false
+    },
+    "website": {
+      "type": "string",
+      "required": true
+    },
     "levels": {
       "type": "number"
     },
@@ -123,6 +131,22 @@
     "NFCTags": {
       "type": "hasMany",
       "model": "NFCTag",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "activityLogs": {
+      "type": "hasMany",
+      "model": "ActivityLog",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "verifications": {
+      "type": "hasMany",
+      "model": "Verification",
       "foreignKey": "instituteId",
       "options": {
         "nestRemoting": true

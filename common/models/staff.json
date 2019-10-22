@@ -24,6 +24,13 @@
     "type": {
       "type": "string",
       "required": true
+    },
+    "yubikeyId": {
+      "type": "string"
+    },
+    "requireYubikey": {
+      "type": "Boolean",
+      "default": false
     }
   },
   "validations": [],

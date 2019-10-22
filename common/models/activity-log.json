@@ -14,13 +14,37 @@
       "type": "string",
       "required": true
     },
-    "linkedRecord": {
-      "type": "object",
+    "table": {
+      "type": "string",
       "required": true
+    },
+    "row": {
+      "type": "string",
+      "required": false,
+      "default": "-"
+    },
+    "browser": {
+      "type": "string",
+      "required": false,
+      "default": "-"
+    },
+    "ip": {
+      "type": "string",
+      "required": false,
+      "default": "-"
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "staff": {
+      "type": "hasOne",
+      "model": "Staff",
+      "foreignKey": "",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
   "acls": [],
   "methods": {}
 }

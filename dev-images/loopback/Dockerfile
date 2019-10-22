@@ -1,11 +1,11 @@
 # Select node version
-From node:8.12.0
-#From node:6.11.1
+From node:11.0.0-stretch
+
 
 # Update/install pakcages
 
 RUN apt-get update && \
-    apt-get install -y curl apt-transport-https build-essential libssl-dev libmysqlclient-dev && \
+    apt-get install -y curl apt-transport-https build-essential libssl-dev default-libmysqlclient-dev && \
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
     apt-get update && apt-get install -y yarn && \

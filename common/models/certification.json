@@ -27,9 +27,21 @@
       "type": "date",
       "required": true
     },
+    "printingDeadline": {
+      "type": "date",
+      "required": false
+    },
+    "price": {
+      "type": "number",
+      "required": false
+    },
     "details": {
       "type": "string",
-      "required": true
+      "required": false
+    },
+    "certificateStatus": {
+      "type": "string",
+      "required": false
     }
   },
   "validations": [],

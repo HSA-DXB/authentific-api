@@ -4,7 +4,7 @@
 
 //custom models : only models with persisted storage should be here
 const MODELS = ['Institute', 'Certification', 'Staff', 'StaffCategory', 'Candidate'
-    , 'Certificate', 'Paper', 'BluePrint', 'StaffCertification', 'ActivityLog', 'Approval', 'NFCTag'];
+    , 'Certificate', 'Paper', 'BluePrint', 'StaffCertification', 'ActivityLog', 'Approval', 'NFCTag', 'Verification'];
 module.exports = function updateCutstomModels(app, next) {
     // reference to our datasource
     const mysql = app.dataSources.mysql;
