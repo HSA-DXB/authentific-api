@@ -3,14 +3,16 @@
     "name": "db",
     "connector": "memory"
   },
-  "mysql": {
-    "host": "mysqlDb",
-    "port": 3306,
-    "database": "LOOPBACKdevdb",
-    "password": "LOOPBACKdevpwd",
-    "name": "mysql",
-    "connector": "mysql",
-    "user": "LOOPBACKdevuser"
+  "mongoDB": {
+    "host": "localhost",
+    "port": 27017,
+    "url": "mongodb://127.0.0.1:27017/authentificapi",
+    "database": "db2",
+    "password": "mypassword",
+    "name": "db2",
+    "user": "me2",
+    "connector": "mongodb",
+    "useNewUrlParser": "true"
   },
   "storage": {
     "name": "storage",

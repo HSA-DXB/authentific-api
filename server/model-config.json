@@ -15,72 +15,72 @@
     ]
   },
   "AccessToken": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": false
   },
   "ACL": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": false
   },
   "RoleMapping": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": false,
     "options": {
       "strictObjectIDCoercion": true
     }
   },
   "Role": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": false
   },
   "Email": {
     "dataSource": "myEmailDatasource"
   },
   "Institute": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   },
   "Certification": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   },
   "Staff": {
-    "dataSource": "mysql"
+    "dataSource": "mongoDB"
   },
   "StaffCategory": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   },
   "Candidate": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   },
   "Certificate": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   },
   "Paper": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   },
   "BluePrint": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   },
   "StaffCertification": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   },
   "ActivityLog": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   },
   "Approval": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   },
   "NFCTag": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   },
   "Attachment": {
@@ -88,7 +88,7 @@
     "public": true
   },
   "Verification": {
-    "dataSource": "mysql",
+    "dataSource": "mongoDB",
     "public": true
   }
 }

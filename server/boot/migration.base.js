@@ -6,9 +6,9 @@
 const MODELS = [ 'AccessToken', 'ACL', 'RoleMapping', 'Role'];
 module.exports = function updateBaseModels (app, next) {
   // reference to our datasource
-  const mysql = app.dataSources.mysql;
+  const myDb = app.dataSources.mongoDB;
   // check if the model is out of sync with DB
-  mysql.isActual(MODELS, (err, actual) => {
+  myDb.isActual(MODELS, (err, actual) => {
     if (err) {
       throw err;
     }
@@ -23,7 +23,7 @@ module.exports = function updateBaseModels (app, next) {
 
     console.log('Migrating Base Models...');
     // update models
-    mysql.autoupdate(MODELS, (_err) => {
+    myDb.autoupdate(MODELS, (_err) => {
       if (_err) {
         throw _err;
       }

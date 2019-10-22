@@ -3,18 +3,18 @@ const path = require('path');
 // import app
 const server = require(path.resolve(__dirname, '../server/server.js'));
 // ref to our datasource
-const mysql = server.dataSources.mysql;
+const myDb = server.dataSources.mongoDB;
 // loopback model tables
 const BASE = ['User','Company','Project','Milestone','Office','Skill','Work', 'AccessToken', 'ACL', 'RoleMapping', 'Role'];
 // defined custom models -> ADD custom
 const CUSTOM = [];
 const lbTables = [].concat(BASE, CUSTOM);
 // cylce to create
-mysql.automigrate(lbTables, function (err) {
+myDb.automigrate(lbTables, function (err) {
   if (err) { throw err; }
   console.log(' ');
-  console.log('Tables [' + lbTables + '] reset in ' + mysql.adapter.name);
+  console.log('Tables [' + lbTables + '] reset in ' + myDb.adapter.name);
   console.log(' ');
-  mysql.disconnect();
+  myDb.disconnect();
   process.exit(0);
 });
