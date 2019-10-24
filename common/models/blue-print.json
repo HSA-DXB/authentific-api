@@ -72,6 +72,14 @@
       "options": {
         "nestRemoting": true
       }
+    },
+    "certificates": {
+      "type": "hasMany",
+      "model": "Certificate",
+      "foreignKey": "bluePrintId",
+      "options": {
+        "nestRemoting": true
+      }
     }
   },
   "acls": [],

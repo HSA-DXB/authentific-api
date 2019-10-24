@@ -15,10 +15,10 @@ module.exports = function (Approval) {
 
         // console.log('certificate', await ReturnWithResolvedPromise(await Approval.app.models.Certificate.findById(ctx.instance.certificateId)));
         let certificate = await ReturnWithResolvedPromise(
-          await Approval.app.models.Certificate.findById(ctx.instance.certificateId, {include: 'approvals'}));
+          await Approval.app.models.Certificate.findById(ctx.instance.certificateId, { include: 'approvals' }));
 
         const certification = await ReturnWithResolvedPromise(
-          await Approval.app.models.Certification.findById(certificate.certificationId, {include: ['staff']}));
+          await Approval.app.models.Certification.findById(certificate.certificationId, { include: ['staff'] }));
 
 
         let isApproved = true;
@@ -43,7 +43,7 @@ module.exports = function (Approval) {
         certificate.isApproved = isApproved;
         console.log('Before Approving', certificate);
 
-        Approval.app.models.Certificate.upsertWithWhere({id: certificate.id}, certificate, (err, result) => {
+        Approval.app.models.Certificate.upsertWithWhere({ id: certificate.id }, certificate, (err, result) => {
           console.log('err Of Updating Certificate', err);
 
           console.log('Result Of Updating Certificate', result);

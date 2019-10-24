@@ -11,8 +11,8 @@ var app = module.exports = loopback();
 
 
 var bodyParser = require('body-parser');
-app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 1000000}));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 1000000 }));
 
 app.start = function () {
   // start the web server
@@ -56,7 +56,7 @@ app.use(async function (req, res, next) {
 
       // dont worry that we are getting so much data, i.e certificates etc.
       // they are just promise functions, not actual data is returned until the promise is resolved
-      UserModel.findById(accessToken.userId, {include: ['staffCategory', {certifications: [{certificates: ['candidate', 'approvals', 'certification']}]}]}, function (err, user) {
+      UserModel.findById(accessToken.userId, { include: ['staffCategory', { certifications: [{ certificates: ['candidate', 'approvals', 'certification'] }] }] }, function (err, user) {
         if (err) return next(err);
         if (!user) return next(new Error('could not find a valid user'));
 
@@ -124,47 +124,46 @@ app.use(async function (req, res, next) {
     next();
   }
 });
+
 app.use('/api/getwaitingformyapproval', async function (req, res) {
-
-
   let result = [];
   //certificates that i approved but are still not approved
-  console.clear()
+  // console.clear()
   let certifications = await awaitableCallback(req.currentUser.certifications);
 
 
   for (const certification of certifications) {
-
-
     const certificates = await awaitableCallback(certification.certificates);
-    console.log(certificates);
     for (const certificate of certificates) {
 
       if (!certificate.isApproved) {
         const approvedByMe = (await resolvePromise(await app.models.Approval.find({
-
-          where: {certificateId: certificate.id, staffId: req.currentUser.id}
-
+          where: { certificateId: certificate.id, staffId: req.currentUser.id }
         })));
 
         if (!approvedByMe || approvedByMe.length < 1) {
-
           result.push(certificate);
         }
-
-        console.log('is approved by me', approvedByMe.length < 1);
-
-
       }
-
-
     }
-
   }
-
   res.status(200).send(result);
+});
 
-
+app.use('/api/checkRemainingCertificateApproval', async function (req, res) {
+  const certificateId = req.body.certificateId;
+  const certificate = (await resolvePromise(await app.models.Certificate.findById(certificateId)));
+  const staffCertifications = (await resolvePromise(await app.models.StaffCertification.find({
+    where: { certificationId: certificate.certificationId }
+  })));
+  const approvals = (await resolvePromise(await app.models.Approval.find({
+    where: { certificateId: certificateId }
+  })));
+  console.log(staffCertifications.length, approvals.length)
+  if (staffCertifications.length === approvals.length) {
+    certificate.updateAttribute('isApproved', true);
+  }
+  res.status(200).send({ success: true });
 });
 
 
@@ -173,7 +172,7 @@ async function handleCertificates(approvals, req, res) {
 
   if (!approvals || approvals.length < 1) {
     console.log('No certificates');
-    res.status(204).send({err: 'No Content.'});
+    res.status(204).send({ err: 'No Content.' });
     return;
   }
 
@@ -228,68 +227,68 @@ async function handleCertificates(approvals, req, res) {
 
 app.use('/api/pendingapprovalbyothers', async function (req, res) {
 
-    let result = [];
-    //certificates that i approved but are still not approved
-    console.clear()
-    let certifications = await awaitableCallback(req.currentUser.certifications);
+  let result = [];
+  //certificates that i approved but are still not approved
+  console.clear()
+  let certifications = await awaitableCallback(req.currentUser.certifications);
 
-    for (const certification of certifications) {
+  for (const certification of certifications) {
 
-      // for (const certificate of certification.certificates) {
-      const certificates = await awaitableCallback(certification.certificates);
+    // for (const certificate of certification.certificates) {
+    const certificates = await awaitableCallback(certification.certificates);
 
-      for (const certificate of certificates) {
+    for (const certificate of certificates) {
 
-        let awaitingApprove = [];
-        if (!certificate.isApproved) {
+      let awaitingApprove = [];
+      if (!certificate.isApproved) {
 
-          const approvalAuthor = (await resolvePromise(await app.models.StaffCertification.find({
-            where: {certificationId: certificate.certificationId}
+        const approvalAuthor = (await resolvePromise(await app.models.StaffCertification.find({
+          where: { certificationId: certificate.certificationId }
+        })));
+
+        let approvedByOther = [];
+        let allAwaitingAuthors = "";
+        let totalApprovalAuthor = approvalAuthor.length;
+        let count = 0;
+
+        for (const author of approvalAuthor) {
+          count++;
+
+          approvedByOther = (await resolvePromise(await app.models.Approval.find({
+            where: { certificateId: certificate.id, staffId: author.staffId }
           })));
-
-          let approvedByOther = [];
-          let allAwaitingAuthors = "";
-          let totalApprovalAuthor = approvalAuthor.length;
-          let count = 0;
-
-          for (const author of approvalAuthor) {
-            count++;
-
-            approvedByOther = (await resolvePromise(await app.models.Approval.find({
-              where: {certificateId: certificate.id, staffId: author.staffId}
+          if (approvedByOther.length < 1) {
+            let authorDetails = (await resolvePromise(await app.models.Staff.find({
+              where: { _id: author.staffId }
             })));
-            if (approvedByOther.length < 1) {
-              let authorDetails = (await resolvePromise(await app.models.Staff.find({
-                where: {_id: author.staffId}
-              })));
-              allAwaitingAuthors += authorDetails[0].firstName + ' ' + authorDetails[0].lastName;
-              if (count !== 1 && count < totalApprovalAuthor) {
-                allAwaitingAuthors += ', ';
-              }
+            allAwaitingAuthors += authorDetails[0].firstName + ' ' + authorDetails[0].lastName;
+            if (count !== 1 && count < totalApprovalAuthor) {
+              allAwaitingAuthors += ', ';
             }
           }
-          certificate.awaitingApprove = allAwaitingAuthors;
-          // if (approvedByOther.length <1) {
-          //     certificate.awaitingApprove = awaitingApprove
-          //     // result.push(certificate);
-          // }
-
-          const approvedByMe = (await resolvePromise(await app.models.Approval.find({
-            where: {certificateId: certificate.id, staffId: req.currentUser.id}
-          })));
-
-          if (approvedByMe.length > 0) {
-            result.push(certificate);
-          }
-          // console.log('approvals', await resolvePromise(await app.models.Approval.find({certificateId: certificate.id})));
-
         }
+        certificate.awaitingApprove = allAwaitingAuthors;
+        // if (approvedByOther.length <1) {
+        //     certificate.awaitingApprove = awaitingApprove
+        //     // result.push(certificate);
         // }
-      }
 
+        const approvedByMe = (await resolvePromise(await app.models.Approval.find({
+          where: { certificateId: certificate.id, staffId: req.currentUser.id }
+        })));
+
+        if (approvedByMe.length > 0) {
+          result.push(certificate);
+        }
+        // console.log('approvals', await resolvePromise(await app.models.Approval.find({certificateId: certificate.id})));
+
+      }
+      // }
     }
-    res.status(200).send(result);
+
   }
+  res.status(200).send(result);
+}
 );
 
 
