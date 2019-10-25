@@ -291,6 +291,23 @@ app.use('/api/pendingapprovalbyothers', async function (req, res) {
 }
 );
 
+app.use('/api/sendEmail', function (req, res) {
+  const sgMail = require('@sendgrid/mail');
+  sgMail.setApiKey('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');
+  const msg = {
+    to: req.body.to,
+    from: 'noreply@authentific.com.au',
+    subject: 'Authentific Account Credentials',
+    html: 'Dear ' +req.body.firstName + ', <br>Thank You for creating account at <strong>Authentific</strong>. ' +
+      'Please login using the following credentials at <strong>Authentific</strong>.<br>' +
+      '<strong>Email: </strong>'+ req.body.to + '<br>' +
+      '<strong>Password: </strong>' + req.body.password + '<br>' +
+      'Have a good day<br>' +
+      '<strong>Regards</strong>,<br>' +
+      '<strong>TEAM AUTHENTIFIC</strong>',
+  };
+  sgMail.send(msg);
+});
 
 // Bootstrap the application, configure models, datasources and middleware.
 // Sub-apps like REST API are mounted via boot scripts.
