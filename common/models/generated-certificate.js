@@ -92,10 +92,10 @@ module.exports = function (Certificate) {
                     identifier: identifier,
                     pin: pin,
                     isPrinted: true,
-                    isVoided: {or: [null, false]}
+                    isVoided: {neq: true}
                 }
             }));
-
+            console.log(result);
             if (result != null) {
 
                 const verification = await resolvePromise(await Certificate.app.models.Verification.create({
