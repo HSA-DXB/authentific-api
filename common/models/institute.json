@@ -45,6 +45,14 @@
       "type": "string",
       "default": ""
     },
+    "signature": {
+      "type": "string",
+      "default": ""
+    },
+    "seal": {
+      "type": "string",
+      "default": ""
+    },
     "timeZoneRegion": {
       "type": "string",
       "default": ""
