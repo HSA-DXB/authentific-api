@@ -225,6 +225,67 @@ async function handleCertificates(approvals, req, res) {
 }
 
 
+app.use('/api/pending-certificate/pendingapprovalbyothers/:certificationId/:id', async function (req, res) {
+
+  let result = [];
+  //certificates that i approved but are still not approved
+  
+  let certificationId = req.params.certificationId;
+  let id = req.params.id;
+
+  // const certification = await awaitableCallback(id);
+  // const certificate = await awaitableCallback(certification.certificates);
+
+ 
+  const approvalAuthor = (await resolvePromise(await app.models.StaffCertification.find({
+    where: { certificationId: certificationId }
+  })));
+  
+
+  let approvedByOther = [];
+  let allAwaitingAuthors = "";
+  let totalApprovalAuthor = approvalAuthor.length;
+  let count = 0;
+
+  for (const author of approvalAuthor) {
+    count++;
+
+    approvedByOther = (await resolvePromise(await app.models.Approval.find({
+      where: { certificateId: id, staffId: author.staffId }
+    })));
+
+    if (approvedByOther.length < 1) {
+      let authorDetails = (await resolvePromise(await app.models.Staff.find({
+        where: { _id: author.staffId }
+      })));
+     
+      allAwaitingAuthors += authorDetails[0].firstName + ' ' + authorDetails[0].lastName;
+      if (count !== 1 && count < totalApprovalAuthor) {
+        allAwaitingAuthors += ', ';
+      }
+    }
+  }
+  // certificate.awaitingApprove = allAwaitingAuthors;
+  
+
+  const approvedByMe = (await resolvePromise(await app.models.Approval.find({
+    where: { certificateId: id, staffId: req.currentUser.id }
+  })));
+
+
+  if (approvedByMe.length > 0 && allAwaitingAuthors=='') {
+    result.push(id);
+  }
+
+  res.status(200).send(result);
+}
+);
+
+
+
+
+
+
 app.use('/api/pendingapprovalbyothers', async function (req, res) {
 
   let result = [];
@@ -276,8 +337,8 @@ app.use('/api/pendingapprovalbyothers', async function (req, res) {
         const approvedByMe = (await resolvePromise(await app.models.Approval.find({
           where: { certificateId: certificate.id, staffId: req.currentUser.id }
         })));
-
-        if (approvedByMe.length > 0) {
+          
+        if (approvedByMe.length > 0 && allAwaitingAuthors!='') {
           result.push(certificate);
         }
         // console.log('approvals', await resolvePromise(await app.models.Approval.find({certificateId: certificate.id})));
