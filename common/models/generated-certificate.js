@@ -8,7 +8,7 @@ const resolvePromise = require('../ResolvePromise');
 module.exports = function (Certificate) {
 
     function randomStringFromGuid(uid, limit) {
-        var chars = uid;
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         var string_length = limit;
         var randomstring = '';
         for (var i = 0; i < string_length; i++) {
@@ -27,14 +27,14 @@ module.exports = function (Certificate) {
 
             ctx.instance.identifier = uuid;
             ctx.instance.pin = randomStringFromGuid(uuid.toString().replace('-', ''), 5);
-            console.log('creating certificate ctx.instances', ctx.instance);
+            // console.log('creating certificate ctx.instances', ctx.instance);
             next();
 
         } else if (ctx.data && (!ctx.data.isPrinted || ctx.data.isPrinted === false) && (!ctx.data.identifier || ctx.data.identifier.length < 1)) {
 
             ctx.data.identifier = uuid;
             ctx.data.pin = randomStringFromGuid(uuid, 5);
-            console.log('creating certificate ctx.data', ctx.data);
+            // console.log('creating certificate ctx.data', ctx.data);
         }
         if (!ctx.instance || !ctx.instance.identifier) {
             next();
@@ -55,10 +55,10 @@ module.exports = function (Certificate) {
                     staffId: ctx.req.currentUser.id,
                     certificateId: instance.id, instituteId: instance.instituteId
                 });
-                console.log('res in creating approval from generating certificate', res)
+                // console.log('res in creating approval from generating certificate', res)
                 return
             } else {
-                console.log('Updated certificate', instance.id);
+                // console.log('Updated certificate', instance.id);
 
             }
 
@@ -92,10 +92,10 @@ module.exports = function (Certificate) {
                     identifier: identifier,
                     pin: pin,
                     isPrinted: true,
-                    isVoided: {neq: true}
+                    isVoided: { neq: true }
                 }
             }));
-            console.log(result);
+            // console.log(result);
             if (result != null) {
 
                 const verification = await resolvePromise(await Certificate.app.models.Verification.create({
@@ -103,11 +103,9 @@ module.exports = function (Certificate) {
                     instituteId: result.instituteId, certificateId: result.id
 
                 }));
-                console.log('verification', verification)
+                // console.log('verification', verification)
 
             }
-
-
             return result;
         }
         catch (e) {
@@ -118,11 +116,11 @@ module.exports = function (Certificate) {
     };
 
     Certificate.remoteMethod('verify', {
-        accepts: [{arg: 'identifier', type: 'string', required: true}, {
+        accepts: [{ arg: 'identifier', type: 'string', required: true }, {
             arg: 'pin',
             type: 'string',
             required: true
-        }, {arg: "options", type: "object", http: "optionsFromRequest"}],
+        }, { arg: "options", type: "object", http: "optionsFromRequest" }],
         returns: {
             arg: 'verified', type: 'Boolean', root: true
         }

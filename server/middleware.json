@@ -33,10 +33,15 @@
   "session": {},
   "auth": {},
   "parse": {
-    "body-parser#json": {},
+    "body-parser#json": {
+      "params": {
+        "limit": "50mb"
+      }
+    },
     "body-parser#urlencoded": {
       "params": {
-        "extended": true
+        "extended": true,
+        "limit": "50mb"
       }
     }
   },

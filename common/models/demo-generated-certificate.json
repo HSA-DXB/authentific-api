@@ -1,0 +1,44 @@
+{
+  "name": "DemoCertificate",
+  "plural": "DemoCertificates",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": true
+  },
+  "properties": {
+    "pin": {
+      "type": "string",
+      "required": true
+    },
+    "identifier": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "string",
+      "required": true
+    },
+    "print": {
+      "type": "string",
+      "required": false,
+      "mysql": {
+        "columnName": "Template",
+        "dataType": "LONGTEXT",
+        "nullable": "N"
+      }
+    }
+  },
+  "validations": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

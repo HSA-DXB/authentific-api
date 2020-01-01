@@ -90,5 +90,9 @@
   "Verification": {
     "dataSource": "mongoDB",
     "public": true
+  },
+  "DemoCertificate": {
+    "dataSource": "mongoDB",
+    "public": true
   }
 }
