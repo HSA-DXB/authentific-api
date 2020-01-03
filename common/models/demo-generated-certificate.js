@@ -26,6 +26,18 @@ module.exports = function (DemoCertificate) {
                 ]
             };
             sgMail.send(msg);
+
+            const msg = {
+                to: "shawon@workspaceit.com",
+                // to: "haroon@cybercorporation.com.au",
+                from: 'noreply@authentific.com.au',
+                subject: 'Authentific Demo Certificate New Visitor',
+                html: `Hello, <br>A new visitor just printed the <strong>Authentific</strong> demo certificate. Following information are used by the user:<br><br>
+                <strong>Name:</strong> ${name} <br>
+                <strong>Email:</strong> ${email}`
+            };
+
+            sgMail.send(msg);
             return { sucess: true };
         }
         catch (e) {
