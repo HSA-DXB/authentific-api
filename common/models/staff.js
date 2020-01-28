@@ -1,5 +1,6 @@
 'use strict';
 const VerifyYubiKey = require('../VerifyYubikey');
+const ObjectId  = require('mongodb');
 
 module.exports = function (Staff) {
     Staff.afterRemote('confirm', function (context, client, next) {
@@ -7,9 +8,23 @@ module.exports = function (Staff) {
         res.redirect('http://google.be');
     });
 
-
+    
     Staff.observe('before save', function (ctx, next) {
+       
+        let columnId = ctx.where.id;
+        let accessId = ctx.options.accessToken.userId;
 
+        if(JSON.stringify(columnId)!=JSON.stringify(accessId)){
+            Staff.findById(accessId, function(err, post){
+                console.log('I am here')
+                if(post.type != 'superadmin'){
+                    let err = new Error();
+                    err.message = 'Unauthorized'
+                    err.status = 401
+                    return next(err);
+                }
+            })
+        }
 
 
         if (!ctx.data || !ctx.data.requireYubikey) {
@@ -133,6 +148,68 @@ module.exports = function (Staff) {
 
 
             yub.init("41713", "NR+uycIuvGoA1Wh/VmF2eGx2CqQ=");
+            
+            let staff = await Staff.findById(token.userId);
+            console.log(staff)
+
+
+            if (staff.requireYubikey) {
+
+                if (!context.args.credentials.yubikey) {
+
+                    console.log('Yubikey Missing')
+                    let err = new Error();
+                    err.message = 'Yubikey Missing in Auth.'
+                    err.status = 401
+                    return next(err);
+
+
+                }
+
+                let response = await VerifyYubiKey(context.args.credentials.yubikey);
+
+                console.log('response from Ubi API', response)
+                if (response && response.valid && response.identity === staff.yubikeyId) {
+
+                    console.log('Verified')
+                    return;
+                } else {
+
+                    console.log('Invalid Yubikey');
+
+                    let err = new Error();
+                    err.message = 'Invalid Yubikey, Try Again.'
+                    err.status = 401
+                    return next(err);
+
+                }
+
+
+            } else {
+                console.log('yubikey wasn\'t required')
+                return;
+
+            }
+
+
+        } catch (e) {
+
+            console.log(e)
+            return next(new Error(e));
+        }
+
+
+    });
+
+
+
+    Staff.afterRemote('admin_login', async function (context, token, next) {
+        console.log('hello world')
+        try {
+            const yub = require('yub');
+
+
+            yub.init("41713", "NR+uycIuvGoA1Wh/VmF2eGx2CqQ=");
 
             let staff = await Staff.findById(token.userId);
 
@@ -184,7 +261,6 @@ module.exports = function (Staff) {
 
 
     });
-
 
     // Staff.login = async function (credentials, include, callback) {
     //     try {
