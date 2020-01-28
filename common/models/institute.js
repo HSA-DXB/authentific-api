@@ -6,6 +6,19 @@ const resolvePromise = require('../ResolvePromise');
 
 module.exports = function (Institute) {
 
+
+    Institute.observe('after save', function (ctx, next) {
+        if(!ctx.isNewInstance){
+            console.log(ctx)
+            next();
+        }else{
+            next();
+        }
+    })
+
+
+
+
     Institute.getMetrics = async (institute, userId) => {
         let metrics = {};
 

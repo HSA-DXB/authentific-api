@@ -10,21 +10,45 @@ module.exports = function (Staff) {
 
     
     Staff.observe('before save', function (ctx, next) {
-       
+
+        if(ctx.instance.type=='superadmin'){
+            let err = new Error();
+            err.message = 'Invalid Request'
+            err.status = 401
+            return next(err);
+        }  
+       if(!ctx.isNewInstance){
         let columnId = ctx.where.id;
         let accessId = ctx.options.accessToken.userId;
 
         if(JSON.stringify(columnId)!=JSON.stringify(accessId)){
             Staff.findById(accessId, function(err, post){
-                console.log('I am here')
-                if(post.type != 'superadmin'){
+               
+                    if(post.type == 'user'){
+                        let err = new Error();
+                        err.message = 'Unauthorized'
+                        err.status = 401
+                        return next(err);
+                    } else{
+                        next();
+                    }
+            })
+        }
+       }else{
+        let accessId = ctx.options.accessToken.userId;
+        Staff.findById(accessId, function(err, post){
+            
+                if(post.type == 'user'){
                     let err = new Error();
                     err.message = 'Unauthorized'
                     err.status = 401
                     return next(err);
-                }
-            })
-        }
+                }else{
+                    next()
+                } 
+        })
+       }
+        
 
 
         if (!ctx.data || !ctx.data.requireYubikey) {
