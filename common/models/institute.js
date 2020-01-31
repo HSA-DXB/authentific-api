@@ -3,15 +3,43 @@
 const ReturnWithResolvedPromise = require('../ResolvePromise');
 const awaitableCallback = require('../awaitableCallback');
 const resolvePromise = require('../ResolvePromise');
+var S3 = require('aws-sdk/clients/s3');
+var AWS = require('aws-sdk');
+AWS.config.update({ accessKeyId: 'AKIAUNBAJ3PZPL7P5RWH', secretAccessKey: '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', region: 'us-west-2' });
+var s3 = new AWS.S3();
+
 
 module.exports = function (Institute) {
 
 
     Institute.observe('after save', function (ctx, next) {
-        if(!ctx.isNewInstance){
-            console.log(ctx)
+        if (!ctx.isNewInstance) {
             next();
-        }else{
+        } else {
+            let instituteId = ctx.instance.id;
+            var params = {
+                Bucket: "institute-" + instituteId + "-images",
+                CreateBucketConfiguration: {
+                    LocationConstraint: "us-west-2"
+                }
+            };
+            s3.createBucket(params, function (err, data) {
+                if (err) console.log(err, err.stack); // an error occurred
+                else console.log(data);           // successful response
+
+            });
+
+            var params = {
+                Bucket: "institute-" + instituteId + "-candidates",
+                CreateBucketConfiguration: {
+                    LocationConstraint: "us-west-2"
+                }
+            };
+            s3.createBucket(params, function (err, data) {
+                if (err) console.log(err, err.stack); // an error occurred
+                else console.log(data);           // successful response
+
+            });
             next();
         }
     })
@@ -23,23 +51,23 @@ module.exports = function (Institute) {
         let metrics = {};
 
         metrics['voidedCertificatesCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count(
-            {and: [{instituteId: institute}, {isVoid: true}, {isVoid: {neq: null}}]}));
+            { and: [{ instituteId: institute }, { isVoid: true }, { isVoid: { neq: null } }] }));
         metrics['printedCertificatesCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count(
-            {and: [{instituteId: institute}, {isPrinted: true}, {isPrinted: {neq: null}}]}));
+            { and: [{ instituteId: institute }, { isPrinted: true }, { isPrinted: { neq: null } }] }));
         metrics['pendingApprovalsCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count(
-            {and: [{instituteId: institute}, {or: [{isApproved: false}, {isApproved: null}]}]}));
-        metrics['candidateCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Candidate.count( {instituteId: institute}));
-        metrics['certificationCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certification.count({instituteId: institute}));
+            { and: [{ instituteId: institute }, { or: [{ isApproved: false }, { isApproved: null }] }] }));
+        metrics['candidateCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Candidate.count({ instituteId: institute }));
+        metrics['certificationCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certification.count({ instituteId: institute }));
         metrics['approvedCertificates'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count({
-                instituteId: institute,
-                isApproved: true
-            }
+            instituteId: institute,
+            isApproved: true
+        }
         ));
 
         //region  count_waiting_for_my_approval
 
         const staff = await ReturnWithResolvedPromise(await Institute.app.models.Staff.findById(userId,
-            {include: [{certifications: ['certificates']}]}));
+            { include: [{ certifications: ['certificates'] }] }));
 
 
         const certifications = await awaitableCallback(staff.certifications);
@@ -48,11 +76,11 @@ module.exports = function (Institute) {
 
         for (let certification of certifications) {
 
-            for (const certificate of  await awaitableCallback(certification.certificates)) {
+            for (const certificate of await awaitableCallback(certification.certificates)) {
                 console.log('certificate', certificate);
                 if (!certificate.isApproved) {
                     const approvedByMe = (await resolvePromise(await Institute.app.models.Approval.count(
-                        {certificateId: certificate.id, staffId: userId}
+                        { certificateId: certificate.id, staffId: userId }
                     )));
 
                     if (approvedByMe < 1) {
@@ -81,17 +109,17 @@ module.exports = function (Institute) {
         //endregion
 
 
-        metrics['staffCategoryCount'] = await ReturnWithResolvedPromise(await Institute.app.models.StaffCategory.count({instituteId: institute}));
-        metrics['staffCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Staff.count({instituteId: institute}));
-        metrics['certificateCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count({instituteId: institute}));
-        metrics['nfcTagsCount'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({instituteId: institute}));
-        metrics['stockCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Paper.count({instituteId: institute}));
+        metrics['staffCategoryCount'] = await ReturnWithResolvedPromise(await Institute.app.models.StaffCategory.count({ instituteId: institute }));
+        metrics['staffCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Staff.count({ instituteId: institute }));
+        metrics['certificateCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count({ instituteId: institute }));
+        metrics['nfcTagsCount'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ instituteId: institute }));
+        metrics['stockCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Paper.count({ instituteId: institute }));
         metrics['damagedStockCount'] = (await ReturnWithResolvedPromise(await Institute.app.models.Paper.count(
-            {instituteId: institute, isDamaged: true})));
+            { instituteId: institute, isDamaged: true })));
 
 
         metrics['verifications'] = (await ReturnWithResolvedPromise(await Institute.app.models.Verification.count(
-            {instituteId: institute})));
+            { instituteId: institute })));
 
 
         return metrics;
@@ -99,9 +127,9 @@ module.exports = function (Institute) {
     };
 
     Institute.remoteMethod('getMetrics', {
-        accepts: [{arg: 'institute', type: 'string'}, {arg: 'userId', type: 'string'}],
-        returns: {arg: 'data', type: 'Object', root: true},
-        http: {path: '/get-metrics', verb: 'get'}
+        accepts: [{ arg: 'institute', type: 'string' }, { arg: 'userId', type: 'string' }],
+        returns: { arg: 'data', type: 'Object', root: true },
+        http: { path: '/get-metrics', verb: 'get' }
     });
 
 };
