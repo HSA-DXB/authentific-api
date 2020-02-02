@@ -29,7 +29,8 @@ module.exports = function (Staff) {
                         err.message = 'Unauthorized'
                         err.status = 401
                         return next(err);
-                    } else{
+                    } 
+                    else{
                         next();
                     }
             })
@@ -43,9 +44,7 @@ module.exports = function (Staff) {
                     err.message = 'Unauthorized'
                     err.status = 401
                     return next(err);
-                }else{
-                    next()
-                } 
+                }
         })
        }
         

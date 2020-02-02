@@ -14,7 +14,49 @@ module.exports = function (Institute) {
 
     Institute.observe('after save', function (ctx, next) {
         if (!ctx.isNewInstance) {
-            next();
+            
+            // dataToCopy.each(function(value, cb) {
+
+            // s3.copyObject({  
+            //     CopySource: srcBucket + '/' + value,
+            //     Bucket: destBucket,
+            //     Key: value
+            //     }, function(copyErr, copyData){
+            //        if (copyErr) {
+            //             console.log("Error: " + copyErr);
+            //          } else {
+            //             console.log('Copied OK');
+            //          } 
+            //     });
+            //   });
+            // s3.copyObject({ 
+            //     CopySource: srcBucket + '/' + sourceObject,
+            //     Bucket: destBucket,
+            //     Key: sourceObject
+            //     }, function(copyErr, copyData){
+            //        if (copyErr) {
+            //             console.log("Error: " + copyErr);
+            //          } else {
+            //             console.log('Copied OK');
+            //          } 
+            //     });
+            //   callback(null, 'All done!');
+            // var params = {};
+            // s3.listBuckets(params, function(err, data) {
+            //     if (err) console.log(err, err.stack); // an error occurred
+            //     else     console.log(data);
+            // })
+            var params = {
+                // Bucket: "institute-5e3402d627391a61f4017128-images", 
+                Bucket: "institute-5e3698e392f17e7f6674a3a1-images", 
+                // MaxKeys: 2
+               };
+               s3.listObjects(params, function(err, data) {
+                 if (err) console.log(err, err.stack); // an error occurred
+                 else     console.log(data); 
+               });
+            next()
+
         } else {
             let instituteId = ctx.instance.id;
             var params = {
@@ -36,11 +78,38 @@ module.exports = function (Institute) {
                 }
             };
             s3.createBucket(params, function (err, data) {
-                if (err) console.log(err, err.stack); // an error occurred
-                else console.log(data);           // successful response
+                if (err) {
+                    console.log(err, err.stack); // an error occurred
+                    next();
+                }
 
+                else{
+                    var srcBucket = "institute-5cd12b7c674dea647ca3914a-images";
+                    var destBucket = "institute-"+instituteId+"-images";
+    
+                    let dataToCopy = ["Template L1-01.jpg","Template L2-01.jpg","Template L3-01.jpg","Template L4-01.jpg", "Template L5-01.jpg", "Template P1-01.jpg","Template P2-01.jpg","Template P3-01.jpg","Template P4-01.jpg", "Template P5-01.jpg"]
+                    let i = 0;
+                    for (let value of dataToCopy) {
+                        s3.copyObject({
+                            CopySource: srcBucket + '/' + value,
+                            Bucket: destBucket,
+                            Key: value
+                        }, function (copyErr, copyData) {
+                            if (copyErr) {
+                                console.log("Error: " + copyErr);
+                                next();
+                            } else {
+                                i++;
+                                if (i == dataToCopy.length) {
+                                    next();
+                                }
+                            }
+                        });
+                    };           // successful response
+                }
+               
             });
-            next();
+
         }
     })
 
