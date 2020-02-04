@@ -10,13 +10,13 @@ module.exports = function (Staff) {
 
     
     Staff.observe('before save', function (ctx, next) {
-
-        if(ctx.instance.type=='superadmin'){
-            let err = new Error();
-            err.message = 'Invalid Request'
-            err.status = 401
-            return next(err);
-        }  
+        // console.log(ctx.instance)
+        // if(ctx.instance.type=='superadmin'){
+        //     let err = new Error();
+        //     err.message = 'Invalid Request'
+        //     err.status = 401
+        //     return next(err);
+        // }  
        if(!ctx.isNewInstance){
         let columnId = ctx.where.id;
         let accessId = ctx.options.accessToken.userId;
@@ -31,7 +31,7 @@ module.exports = function (Staff) {
                         return next(err);
                     } 
                     else{
-                        next();
+                        // return next();
                     }
             })
         }
