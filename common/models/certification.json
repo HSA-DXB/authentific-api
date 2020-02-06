@@ -62,6 +62,14 @@
         "nestRemoting": true
       },
       "through": "StaffCertification"
+    },
+    "candidates": {
+      "type": "hasMany",
+      "model": "Candidate",
+      "foreignKey": "certificationId",
+      "options": {
+        "nestRemoting": true
+      }
     }
   },
   "acls": [
