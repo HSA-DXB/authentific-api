@@ -42,10 +42,23 @@
     "certificateStatus": {
       "type": "string",
       "required": false
+    },
+    "candidateSchema": {
+      "type": "array",
+      "required": false
     }
   },
   "validations": [],
   "relations": {
+    
+    "candidates": {
+      "type": "hasMany",
+      "model": "Candidate",
+      "foreignKey": "certificationId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
     "certificates": {
       "type": "hasMany",
       "model": "Certificate",
@@ -62,14 +75,6 @@
         "nestRemoting": true
       },
       "through": "StaffCertification"
-    },
-    "candidates": {
-      "type": "hasMany",
-      "model": "Candidate",
-      "foreignKey": "certificationId",
-      "options": {
-        "nestRemoting": true
-      }
     }
   },
   "acls": [

@@ -27,6 +27,11 @@
     },
     "registrationNumber": {
       "type": "string"
+    },
+    "certificateGenerate": {
+      "type": "Boolean",
+      "required": false,
+      "default": false
     }
   },
   "validations": [],
