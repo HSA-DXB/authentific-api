@@ -154,7 +154,8 @@ module.exports = function (Certification) {
                 certification['printed'] = await ReturnWithResolvedPromise(await Certification.app.models.Certificate.count(
                     { and: [{ certificationId: certification.id }, { isPrinted: true }] }));
                 console.log('printed', certification['printed']);
-
+                certification['candidate'] = await ReturnWithResolvedPromise(await Certification.app.models.Candidate.count(
+                    { certificationId: certification.id }));
 
             }
             return certifications;
