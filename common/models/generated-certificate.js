@@ -3,6 +3,7 @@ var Uuid = require('uuid/v4');
 var cloneFunction = require('../../cloneFunction')
 const awaitableCallback = require('../awaitableCallback');
 var UAParser = require('ua-parser-js');
+var Candidate = require('../models/candidate');
 
 const resolvePromise = require('../ResolvePromise');
 module.exports = function (Certificate) {
@@ -93,7 +94,8 @@ module.exports = function (Certificate) {
                     pin: pin,
                     isPrinted: true,
                     isVoided: { neq: true }
-                }
+                },
+                include: 'candidate'
             }));
             // console.log(result);
             if (result != null) {
@@ -103,10 +105,12 @@ module.exports = function (Certificate) {
                     instituteId: result.instituteId, certificateId: result.id
 
                 }));
-                // console.log('verification', verification)
 
+                return result;
+            }else{
+                return result;
             }
-            return result;
+            
         }
         catch (e) {
             console.log(e);
