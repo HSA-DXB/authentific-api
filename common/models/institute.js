@@ -146,7 +146,7 @@ module.exports = function (Institute) {
         for (let certification of certifications) {
 
             for (const certificate of await awaitableCallback(certification.certificates)) {
-                console.log('certificate', certificate);
+                // console.log('certificate', certificate);
                 if (!certificate.isApproved) {
                     const approvedByMe = (await resolvePromise(await Institute.app.models.Approval.count(
                         { certificateId: certificate.id, staffId: userId }
@@ -157,8 +157,8 @@ module.exports = function (Institute) {
                         metrics['waitingForMyApproval'] += 1;
                     }
 
-                    console.log('is approved by me', approvedByMe);
-                    console.log('waiting', metrics['waitingForMyApproval']);
+                    // console.log('is approved by me', approvedByMe);
+                    // console.log('waiting', metrics['waitingForMyApproval']);
 
 
                 } else if (certificate.isPrinted && certification.price) {

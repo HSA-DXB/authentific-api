@@ -63,8 +63,8 @@ module.exports = function (Staff) {
 
 
             yub.verify(ctx.data.yubikeyId, function (err, response) {
-                console.log('Yubi err', err)
-                console.log('YubiResponse', response.identity)
+                // console.log('Yubi err', err)
+                // console.log('YubiResponse', response.identity)
 
                 if (response && response.valid) {
                     console.log(response.identity);
@@ -121,9 +121,9 @@ module.exports = function (Staff) {
     function addInstituteToStaff(staff, context, next) {
 
 
-        console.log('staff passed')
+        // console.log('staff passed')
         Staff.app.models.Institute.findById(staff.instituteId, function (err, institute) {
-            console.log('institute found', institute)
+            // console.log('institute found', institute)
             if (err) {
                 console.log('err', err)
                 return next(err);
@@ -132,7 +132,7 @@ module.exports = function (Staff) {
 
             staff['institute'] = institute;
             delete staff['password'];
-            console.log('yellow', staff)
+            // console.log('yellow', staff)
             context.res.status(200).send(staff);
 
         });
@@ -165,7 +165,7 @@ module.exports = function (Staff) {
     }
 
     Staff.afterRemote('login', async function (context, token, next) {
-        console.log('hello world')
+        // console.log('hello world')
         try {
             const yub = require('yub');
 
@@ -173,14 +173,14 @@ module.exports = function (Staff) {
             yub.init("41713", "NR+uycIuvGoA1Wh/VmF2eGx2CqQ=");
             
             let staff = await Staff.findById(token.userId);
-            console.log(staff)
+            // console.log(staff)
 
 
             if (staff.requireYubikey) {
 
                 if (!context.args.credentials.yubikey) {
 
-                    console.log('Yubikey Missing')
+                    // console.log('Yubikey Missing')
                     let err = new Error();
                     err.message = 'Yubikey Missing in Auth.'
                     err.status = 401
@@ -191,14 +191,14 @@ module.exports = function (Staff) {
 
                 let response = await VerifyYubiKey(context.args.credentials.yubikey);
 
-                console.log('response from Ubi API', response)
+                // console.log('response from Ubi API', response)
                 if (response && response.valid && response.identity === staff.yubikeyId) {
 
-                    console.log('Verified')
+                    // console.log('Verified')
                     return;
                 } else {
 
-                    console.log('Invalid Yubikey');
+                    // console.log('Invalid Yubikey');
 
                     let err = new Error();
                     err.message = 'Invalid Yubikey, Try Again.'
@@ -217,7 +217,7 @@ module.exports = function (Staff) {
 
         } catch (e) {
 
-            console.log(e)
+            // console.log(e)
             return next(new Error(e));
         }
 
@@ -227,7 +227,7 @@ module.exports = function (Staff) {
 
 
     Staff.afterRemote('admin_login', async function (context, token, next) {
-        console.log('hello world')
+        // console.log('hello world')
         try {
             const yub = require('yub');
 
@@ -252,14 +252,14 @@ module.exports = function (Staff) {
 
                 let response = await VerifyYubiKey(context.args.credentials.yubikey);
 
-                console.log('response from Ubi API', response)
+                // console.log('response from Ubi API', response)
                 if (response && response.valid && response.identity === staff.yubikeyId) {
 
-                    console.log('Verified')
+                    // console.log('Verified')
                     return;
                 } else {
 
-                    console.log('Invalid Yubikey');
+                    // console.log('Invalid Yubikey');
 
                     let err = new Error();
                     err.message = 'Invalid Yubikey, Try Again.'

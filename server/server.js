@@ -19,10 +19,10 @@ app.start = function () {
   return app.listen(function () {
     app.emit('started');
     var baseUrl = app.get('url').replace(/\/$/, '');
-    console.log('Authentific is listening at: %s', baseUrl);
+    // console.log('Authentific is listening at: %s', baseUrl);
     if (app.get('loopback-component-explorer')) {
       var explorerPath = app.get('loopback-component-explorer').mountPath;
-      console.log('Browse Authentific Api at %s%s', baseUrl, explorerPath);
+      // console.log('Browse Authentific Api at %s%s', baseUrl, explorerPath);
     }
   });
 };
@@ -159,7 +159,7 @@ app.use('/api/checkRemainingCertificateApproval', async function (req, res) {
   const approvals = (await resolvePromise(await app.models.Approval.find({
     where: { certificateId: certificateId }
   })));
-  console.log(staffCertifications.length, approvals.length)
+  // console.log(staffCertifications.length, approvals.length)
   if (staffCertifications.length === approvals.length) {
     certificate.updateAttribute('isApproved', true);
   }
@@ -171,7 +171,7 @@ async function handleCertificates(approvals, req, res) {
 
 
   if (!approvals || approvals.length < 1) {
-    console.log('No certificates');
+    // console.log('No certificates');
     res.status(204).send({ err: 'No Content.' });
     return;
   }
@@ -218,7 +218,7 @@ async function handleCertificates(approvals, req, res) {
       }
     });
   } catch (e) {
-    console.log('Exception', e)
+    // console.log('Exception', e)
     res.status(501).send(e)
   }
 

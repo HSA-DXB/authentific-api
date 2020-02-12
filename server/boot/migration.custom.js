@@ -14,22 +14,22 @@ module.exports = function updateCutstomModels(app, next) {
             throw err;
         }
         const syncStatus = actual ? 'in sync' : 'out of sync';
-        console.log('');
-        console.log(`Custom models are ${syncStatus}`);
-        console.log('');
+        // console.log('');
+        // console.log(`Custom models are ${syncStatus}`);
+        // console.log('');
         // skip if models in sync
         if (actual) {
             return next();
         }
 
-        console.log('Migrating Custom Models...');
+        // console.log('Migrating Custom Models...');
         // update models
         myDb.autoupdate(MODELS, (_err) => {
             if (_err) {
                 throw _err;
             }
-            console.log('Custom models migration successful!');
-            console.log('');
+            // console.log('Custom models migration successful!');
+            // console.log('');
             next();
         });
     });
