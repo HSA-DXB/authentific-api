@@ -13,7 +13,7 @@ module.exports = function (Certification) {
     // });
 
     Certification.afterRemote('*.save', function (ctx, Certification, next) {
-        console.log('******* In create ********', Certification);
+        // console.log('******* In create ********', Certification);
 
         next();
     });
@@ -77,7 +77,7 @@ module.exports = function (Certification) {
                     }); // pin and identifier are made by operation hook in generated certificate
 
                     if (generatedCertificate) {
-                        console.log('generated certificate in certification', generatedCertificate);
+                        // console.log('generated certificate in certification', generatedCertificate);
 
                         let savedApproval = await Certification.app.models.Approval.create({
                             staffId: staffId,
@@ -87,7 +87,7 @@ module.exports = function (Certification) {
 
                         let approval = await Certification.app.models.Approval.findById(savedApproval.id, { include: [{ certificate: 'candidate' }] });
 
-                        console.log('generated approval', approval);
+                        // console.log('generated approval', approval);
 
                         result.push(approval);
 
@@ -103,14 +103,14 @@ module.exports = function (Certification) {
                 }
             }
 
-            console.log('result', result);
+            // console.log('result', result);
 
             if (allOK) {
-                console.log('A Okay');
+                // console.log('A Okay');
 
                 return result;
             } else {
-                console.log('all was not ok');
+                // console.log('all was not ok');
                 return 'An unexpected server error occurred while importing candidates';
             }
         } catch
@@ -146,14 +146,14 @@ module.exports = function (Certification) {
                     { certificationId: certification.id }));
                 certification['approved'] = await ReturnWithResolvedPromise(await Certification.app.models.Certificate.count(
                     { certificationId: certification.id, isApproved: true }));
-                console.log('approved', certification['approved']);
+                // console.log('approved', certification['approved']);
                 certification['pendingApproval'] = await ReturnWithResolvedPromise(await Certification.app.models.Certificate.count(
                     { and: [{ certificationId: certification.id }, { or: [{ isApproved: false }, { isApproved: null }] }] }));
-                console.log('pendingApproval', certification['pendingApproval']);
+                // console.log('pendingApproval', certification['pendingApproval']);
 
                 certification['printed'] = await ReturnWithResolvedPromise(await Certification.app.models.Certificate.count(
                     { and: [{ certificationId: certification.id }, { isPrinted: true }] }));
-                console.log('printed', certification['printed']);
+                // console.log('printed', certification['printed']);
                 certification['candidate'] = await ReturnWithResolvedPromise(await Certification.app.models.Candidate.count(
                     { certificationId: certification.id }));
 
