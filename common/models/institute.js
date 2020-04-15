@@ -5,7 +5,7 @@ const awaitableCallback = require('../awaitableCallback');
 const resolvePromise = require('../ResolvePromise');
 var S3 = require('aws-sdk/clients/s3');
 var AWS = require('aws-sdk');
-AWS.config.update({ accessKeyId: 'AKIAUNBAJ3PZF57PPIUW', secretAccessKey: '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', region: 'us-west-2' });
+AWS.config.update({ accessKeyId: 'AKIAUNBAJ3PZOQYYVKU7', secretAccessKey: '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', region: 'us-west-2' });
 // AWS.config.update({ accessKeyId: 'AKIAUNBAJ3PZPL7P5RWH', secretAccessKey: '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', region: 'us-west-2' });
 var s3 = new AWS.S3();
 
@@ -15,6 +15,7 @@ module.exports = function (Institute) {
 
 
     Institute.observe('after save', function (ctx, next) {
+
         if (!ctx.isNewInstance) {
             
             // dataToCopy.each(function(value, cb) {

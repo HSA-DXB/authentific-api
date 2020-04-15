@@ -18,8 +18,8 @@
     "name": "storage",
     "connector": "loopback-component-storage",
     "provider": "amazon",
-    "key": "vQZepOjWFaKH6HgvFY4pWHQWYB1IPQPR+mLfx/gY",
-    "keyId": "AKIAUNBAJ3PZPL7P5RWH",
+    "key": "ATILxadOCaWWUNsjE2qh/JgQ7E9ylh+IGZeFUtaj",
+    "keyId": "AKIAUNBAJ3PZOQYYVKU7",
     "nameConflict": "makeUnique",
     "maxFileSize": "209715200"
   },
