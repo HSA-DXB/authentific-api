@@ -88,6 +88,14 @@
       "options": {
         "nestRemoting": true
       }
+    },
+    "NFCTag": {
+      "type": "hasOne",
+      "model": "NFCTag",
+      "foreignKey": "certificateId",
+      "options": {
+        "nestRemoting": true
+      }
     }
   },
   "acls": [

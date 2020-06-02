@@ -17,11 +17,21 @@
       "defaultFn": "guid"
     },
     "isDamaged": {
-      "type": "Boolean"
+      "type": "Boolean",
+      "default":false
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "certificate": {
+      "type": "belongsTo",
+      "model": "Certificate",
+      "foreignKey": "certificateId",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
   "acls": [],
   "methods": {}
 }
