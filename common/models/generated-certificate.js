@@ -9,7 +9,7 @@ const resolvePromise = require('../ResolvePromise');
 module.exports = function (Certificate) {
 
     function randomStringFromGuid(uid, limit) {
-        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz123456789';
         var string_length = limit;
         var randomstring = '';
         for (var i = 0; i < string_length; i++) {
