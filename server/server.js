@@ -7,6 +7,7 @@ var UAParser = require('ua-parser-js');
 const publicIp = require('public-ip');
 const awaitableCallback = require('../common/awaitableCallback');
 const resolvePromise = require('../common/ResolvePromise');
+const scheduleBackupJob = require('../scheduler/scheduleBackup')
 var app = module.exports = loopback();
 
 
@@ -15,6 +16,8 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 1000000 }));
 
 app.start = function () {
+
+  scheduleBackupJob()
   // start the web server
   return app.listen(function () {
     app.emit('started');
@@ -26,6 +29,7 @@ app.start = function () {
     }
   });
 };
+
 
 
 // Retrieve the currently authenticated user
