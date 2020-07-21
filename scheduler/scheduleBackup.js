@@ -19,8 +19,8 @@ const files = ["client", "cloneFunction", "common", "dev-images", "docker-compos
 
 
 const scheduleBackupJob = () => {
-    schedule.scheduleJob("0 1 * * *", (e) => {
-    // schedule.scheduleJob("*/1 * * * *", (e) => {
+    // schedule.scheduleJob("0 1 * * *", (e) => {
+    schedule.scheduleJob("*/1 * * * *", (e) => {
         // updateToDb();
         // return;
         var today = new Date();
@@ -29,7 +29,21 @@ const scheduleBackupJob = () => {
         var yyyy = today.getFullYear();
         var todaysDate = yyyy + '-' + mm + '-' + dd;
 
-        var dir = projectLocation + 'backup/'+projectName;
+
+        var projectRequestData = {
+            url: config.scheduleBackupProjectUrl + "project/"+projectId,
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        };
+
+        request(projectRequestData, function (error, response) {
+            let projectResponse = JSON.parse(response.body)
+            console.log(projectResponse)
+            
+            if(projectResponse && projectResponse.Status=='active'){
+                var dir = projectLocation + 'backup/'+projectName;
         if (!fs.existsSync(projectLocation + 'backup')) {
             fs.mkdirSync(projectLocation + 'backup');
         }
@@ -64,6 +78,10 @@ const scheduleBackupJob = () => {
                 uploadToDropbox(projectName,todaysDate);
             });
         });
+            }
+        })
+
+        
     })
 }
 
