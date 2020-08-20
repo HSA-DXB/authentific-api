@@ -12,7 +12,8 @@
     "name": "",
     "user": "",
     "connector": "mongodb",
-    "useNewUrlParser": "true"
+    "useNewUrlParser": "true",
+    "useUnifiedTopology":"true"
   },
   "storage": {
     "name": "storage",
