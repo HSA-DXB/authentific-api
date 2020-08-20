@@ -151,14 +151,6 @@
       "options": {
         "nestRemoting": true
       }
-    },
-    "verifications": {
-      "type": "hasMany",
-      "model": "Verification",
-      "foreignKey": "instituteId",
-      "options": {
-        "nestRemoting": true
-      }
     }
   },
   "acls": [
