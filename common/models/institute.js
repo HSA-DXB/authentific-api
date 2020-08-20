@@ -202,8 +202,8 @@ module.exports = function (Institute) {
             { instituteId: institute, isDamaged: true })));
 
 
-        // metrics['verifications'] = (await ReturnWithResolvedPromise(await Institute.app.models.Verification.count(
-        //     { instituteId: institute })));
+        metrics['verifications'] = (await ReturnWithResolvedPromise(await Institute.app.models.Verification.count(
+            { instituteId: institute })));
 
 
         return metrics;
