@@ -25,6 +25,10 @@
       "type": "Boolean",
       "default": false
     },
+    "isReportGenerated": {
+      "type": "Boolean",
+      "default": false
+    },
     "pin": {
       "type": "string",
       "required": false

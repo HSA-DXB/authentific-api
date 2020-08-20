@@ -135,6 +135,18 @@ module.exports = function (Institute) {
             isApproved: true
         }
         ));
+        metrics['pendingReport'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count({
+            instituteId: institute,
+            isApproved: true,
+            isReportGenerated:false
+        }
+        ));
+        metrics['generatedReport'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count({
+            instituteId: institute,
+            isApproved: true,
+            isReportGenerated:true
+        }
+        ));
 
         //region  count_waiting_for_my_approval
 

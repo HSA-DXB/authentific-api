@@ -19,8 +19,8 @@ const files = ["client", "cloneFunction", "common", "dev-images", "docker-compos
 
 
 const scheduleBackupJob = () => {
-    // schedule.scheduleJob("0 1 * * *", (e) => {
-    schedule.scheduleJob("*/1 * * * *", (e) => {
+    schedule.scheduleJob("0 1 * * *", (e) => {
+    // schedule.scheduleJob("*/1 * * * *", (e) => {
         // updateToDb();
         // return;
         var today = new Date();
