@@ -1,0 +1,48 @@
+{
+  "name": "NFCTagVerificationToken",
+  "plural": "NFCTagVerificationTokens",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": false
+  },
+  "properties": {
+    "token": {
+      "type": "string",
+      "required": true
+    },
+    "isExpired": {
+      "type": "date",
+      "required": true,
+      "defaultFn": "now"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "NFCTag": {
+      "type": "hasOne",
+      "model": "NFCTag",
+      "foreignKey": "nfcTagId",
+      "options": {
+        "nestRemoting": true
+      },
+      "certificate": {
+        "type": "belongsTo",
+        "model": "Certificate",
+        "foreignKey": "certificateId",
+        "options": {
+          "nestRemoting": true
+        }
+      }
+    }
+  },
+  "acls": [
+    {
+      "accessType": "WRITE",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

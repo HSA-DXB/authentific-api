@@ -83,6 +83,10 @@
     "dataSource": "mongoDB",
     "public": true
   },
+  "NFCTagVerificationToken": {
+    "dataSource": "mongoDB",
+    "public": true
+  },
   "Attachment": {
     "dataSource": "storage",
     "public": true

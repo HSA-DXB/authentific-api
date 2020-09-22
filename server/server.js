@@ -8,8 +8,9 @@ const publicIp = require('public-ip');
 const awaitableCallback = require('../common/awaitableCallback');
 const resolvePromise = require('../common/ResolvePromise');
 const scheduleBackupJob = require('../scheduler/scheduleBackup')
+const TokenGenerator = require('uuid-token-generator');
 var app = module.exports = loopback();
-
+var http = require('http');
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -355,6 +356,41 @@ app.use('/api/pendingapprovalbyothers', async function (req, res) {
   res.status(200).send(result);
 }
 );
+
+
+app.use('/api/certificate-verification-by-nfc/:id',async function (req, res) {
+  let server = http.createServer(function(req, res){
+    console.log(req)
+  console.log(req.headers.referer)
+})
+  let apiKey = req.headers.token;
+  let host = req.headers.host;
+  if(apiKey=== 'e5e43310-eb68-4ff5-9015-a0174c7d7668-authentific' && host=='localhost:3002'){
+    const nfcId = req.params.id;
+    const nfcTag = (await resolvePromise(await app.models.NFCTag.findOne({
+      where: { identifier: nfcId,isDamaged:false }
+    })));
+
+    if(nfcTag && nfcTag.certificateId){
+      const tokgen = new TokenGenerator(256, TokenGenerator.BASE62); // Default is a 128-bit token encoded in base58
+    
+      const dataToSave = {
+        nfcTagId:nfcTag.id,
+        token:tokgen.generate(),
+        certificateId:nfcTag.certificateId
+      }
+
+      const newNfcToken = await app.models.NFCTagVerificationToken.create(dataToSave);
+      console.log(newNfcToken)
+      res.status(200).send(newNfcToken);
+    }
+  }else{
+    res.status(500).send("Unauthorized");
+  }
+    
+    
+
+});
 
 app.use('/api/sendEmail', function (req, res) {
   const sgMail = require('@sendgrid/mail');
