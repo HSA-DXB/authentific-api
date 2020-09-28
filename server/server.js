@@ -365,7 +365,8 @@ app.use('/api/certificate-verification-by-nfc/:id',async function (req, res) {
 })
   let apiKey = req.headers.token;
   let host = req.headers.host;
-  if(apiKey=== 'e5e43310-eb68-4ff5-9015-a0174c7d7668-authentific' && host=='localhost:3002'){
+  console.log(host)
+  if(apiKey=== 'e5e43310-eb68-4ff5-9015-a0174c7d7668-authentific'){
     const nfcId = req.params.id;
     const nfcTag = (await resolvePromise(await app.models.NFCTag.findOne({
       where: { identifier: nfcId,isDamaged:false }
