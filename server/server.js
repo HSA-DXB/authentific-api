@@ -372,6 +372,7 @@ app.use('/api/certificate-verification-by-nfc/:id',async function (req, res) {
       where: { identifier: nfcId,isDamaged:false }
     })));
 
+
     if(nfcTag && nfcTag.certificateId){
       const tokgen = new TokenGenerator(256, TokenGenerator.BASE62); // Default is a 128-bit token encoded in base58
     
