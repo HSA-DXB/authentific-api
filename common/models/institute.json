@@ -57,6 +57,11 @@
       "type": "string",
       "default": ""
     },
+    "certificateLimit": {
+      "type": "number",
+      "required": true,
+      "default": "1"
+    },
     "font": {
       "type": "string",
       "default": ""
