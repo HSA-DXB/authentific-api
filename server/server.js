@@ -360,19 +360,20 @@ app.use('/api/pendingapprovalbyothers', async function (req, res) {
 
 app.use('/api/certificate-verification-by-nfc/:id',async function (req, res) {
   let server = http.createServer(function(req, res){
-    console.log(req)
-  console.log(req.headers.referer)
+  console.log(req)
+  
 })
   let apiKey = req.headers.token;
   let host = req.headers.host;
-  console.log(host)
+  
   if(apiKey=== 'e5e43310-eb68-4ff5-9015-a0174c7d7668-authentific'){
     const nfcId = req.params.id;
+    console.log(nfcId)
     const nfcTag = (await resolvePromise(await app.models.NFCTag.findOne({
       where: { identifier: nfcId,isDamaged:false }
     })));
 
-
+    console.log(nfcTag)
     if(nfcTag && nfcTag.certificateId){
       const tokgen = new TokenGenerator(256, TokenGenerator.BASE62); // Default is a 128-bit token encoded in base58
     
