@@ -11,7 +11,8 @@ const scheduleBackupJob = require('../scheduler/scheduleBackup')
 const TokenGenerator = require('uuid-token-generator');
 var app = module.exports = loopback();
 var http = require('http');
-
+var GoogleUrl = require( 'google-url' );
+var request = require('request');
 var bodyParser = require('body-parser');
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 1000000 }));
@@ -31,6 +32,37 @@ app.start = function () {
   });
 };
 
+app.use('/api/createShortUrl', function (req, res) {
+  var headers = {
+    'Authorization': 'Bearer 52100c01812625ce4ab7da0eef221381411ca990',
+    'Content-Type': 'application/json'
+};
+
+
+
+let list = ['1','2','3'];
+let urls=[];
+  list.forEach(element => {
+    var sendData = {
+      "long_url": "https://dev.bitly.com"+element, 
+      "domain": "bit.ly"
+    }
+    var dataString = JSON.stringify(sendData);
+
+    var options = {
+        url: 'https://api-ssl.bitly.com/v4/shorten',
+        method: 'POST',
+        headers: headers,
+        body: dataString
+    };
+    request(options,async function(error,response, body){
+      urls.push(JSON.parse(body))
+      if(list.length==urls.length){
+        res.send(urls)
+      }
+    });
+  });
+});
 
 
 // Retrieve the currently authenticated user
@@ -394,6 +426,9 @@ app.use('/api/certificate-verification-by-nfc/:id',async function (req, res) {
     
 
 });
+
+
+
 
 app.use('/api/sendEmail', function (req, res) {
   const sgMail = require('@sendgrid/mail');

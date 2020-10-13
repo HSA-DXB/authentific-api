@@ -7,18 +7,26 @@
     "validateUpsert": true
   },
   "properties": {
-    "batchId": {
+    "nfcId": {
       "type": "string",
-      "required": true
+      "required": false
     },
     "identifier": {
       "type": "string",
       "required": true,
       "defaultFn": "guid"
     },
+    "shortUrl": {
+      "type": "string",
+      "required": true
+    },
     "isDamaged": {
       "type": "Boolean",
       "default":false
+    },
+    "shortUrlInfo": {
+      "type": "Object",
+      "required":false
     }
   },
   "validations": [],
@@ -27,6 +35,14 @@
       "type": "belongsTo",
       "model": "Certificate",
       "foreignKey": "certificateId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "institute": {
+      "type": "belongsTo",
+      "model": "Institute",
+      "foreignKey": "instituteId",
       "options": {
         "nestRemoting": true
       }
