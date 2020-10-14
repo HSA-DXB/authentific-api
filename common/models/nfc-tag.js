@@ -18,7 +18,7 @@ module.exports = function (Nfctag) {
             for (let i = 0; i < length; i++) {
                 let identifier = short.generate();
                 var sendData = {
-                    "long_url": "https://dev.bitly.com" + identifier,
+                    "long_url": "http://34.123.39.143?pid=" + identifier,
                     "domain": "bit.ly"
                 }
                 var dataString = JSON.stringify(sendData);
@@ -64,7 +64,7 @@ module.exports = function (Nfctag) {
     }
 
     Nfctag.remoteMethod('generate', {
-        accepts: [{ arg: 'identifierLength', type: 'any', required: true }, { arg: "options", type: "object", http: "optionsFromRequest" }],
+        accepts: [{ arg: 'number', type: 'any', required: true }, { arg: "options", type: "object", http: "optionsFromRequest" }],
         returns: {
             arg: 'data', type: 'any', root: true
         }
