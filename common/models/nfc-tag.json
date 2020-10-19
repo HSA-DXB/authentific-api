@@ -20,6 +20,10 @@
       "type": "string",
       "required": true
     },
+    "isAssigned": {
+      "type": "Boolean",
+      "default":false
+    },
     "isDamaged": {
       "type": "Boolean",
       "default":false
