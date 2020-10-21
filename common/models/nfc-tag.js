@@ -1,5 +1,6 @@
 'use strict';
 var request = require('request');
+const ReturnWithResolvedPromise = require('../ResolvePromise');
 const resolvePromise = require('../ResolvePromise');
 const short = require('short-uuid');
 
@@ -45,7 +46,6 @@ module.exports = function (Nfctag) {
             console.log(e);
             return e;
         }
-
     };
 
     async function sendRequest(options,identifier) {
@@ -63,10 +63,27 @@ module.exports = function (Nfctag) {
         })
     }
 
+    Nfctag.summary = async function (options) {
+        let metrics={};
+        metrics['damaged'] = (await ReturnWithResolvedPromise(await Nfctag.count({ isDamaged: true })));
+        metrics['assigned'] = (await ReturnWithResolvedPromise(await Nfctag.count({ isDamaged: false,isAssigned:true})));
+        metrics['unassigned'] = (await ReturnWithResolvedPromise(await Nfctag.count({ isDamaged: false,isAssigned:false,nfcId:{ "neq":  null }})));
+        metrics['newGenerated'] = (await ReturnWithResolvedPromise(await Nfctag.count({ isDamaged: false,nfcId:undefined })));
+   
+        return metrics;
+    }
+
     Nfctag.remoteMethod('generate', {
         accepts: [{ arg: 'number', type: 'any', required: true }, { arg: "options", type: "object", http: "optionsFromRequest" }],
         returns: {
             arg: 'data', type: 'any', root: true
         }
     });
+
+    Nfctag.remoteMethod('summary', {
+        accepts: [{ arg: "options", type: "object", http: "optionsFromRequest" }],
+        returns: { arg: 'data', type: 'Object', root: true },
+        http: { path: '/summary', verb: 'get' }
+    });
+    
 };
