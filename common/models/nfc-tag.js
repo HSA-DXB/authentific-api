@@ -67,8 +67,8 @@ module.exports = function (Nfctag) {
         let metrics={};
         metrics['damaged'] = (await ReturnWithResolvedPromise(await Nfctag.count({ isDamaged: true })));
         metrics['assigned'] = (await ReturnWithResolvedPromise(await Nfctag.count({ isDamaged: false,isAssigned:true})));
-        metrics['unassigned'] = (await ReturnWithResolvedPromise(await Nfctag.count({ isDamaged: false,isAssigned:false,nfcId:{ "neq":  null }})));
-        metrics['newGenerated'] = (await ReturnWithResolvedPromise(await Nfctag.count({ isDamaged: false,nfcId:undefined })));
+        metrics['unassigned'] = (await ReturnWithResolvedPromise(await Nfctag.count({ isDamaged: false,isAssigned:false,nfcId:{ "neq":  "" }})));
+        metrics['newGenerated'] = (await ReturnWithResolvedPromise(await Nfctag.count({ isDamaged: false,nfcId:"" })));
    
         return metrics;
     }

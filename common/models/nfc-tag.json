@@ -9,7 +9,8 @@
   "properties": {
     "nfcId": {
       "type": "string",
-      "required": false
+      "required": false,
+      "default": ""
     },
     "identifier": {
       "type": "string",
