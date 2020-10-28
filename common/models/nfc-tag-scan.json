@@ -1,0 +1,45 @@
+{
+  "name": "NFCTagScan",
+  "plural": "NFCTagScans",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "success": {
+      "type": "Boolean",
+      "default":true
+    }
+    
+  },
+  "validations": [],
+  "relations": {
+    "certificate": {
+      "type": "belongsTo",
+      "model": "Certificate",
+      "foreignKey": "certificateId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "institute": {
+      "type": "belongsTo",
+      "model": "Institute",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "nfcTag": {
+      "type": "belongsTo",
+      "model": "NFCTag",
+      "foreignKey": "nfcId",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

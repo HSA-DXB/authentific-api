@@ -79,6 +79,10 @@
     "dataSource": "mongoDB",
     "public": true
   },
+  "NFCTagScan": {
+    "dataSource": "mongoDB",
+    "public": true
+  },
   "NFCTag": {
     "dataSource": "mongoDB",
     "public": true
