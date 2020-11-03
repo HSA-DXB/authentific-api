@@ -391,18 +391,18 @@ app.use('/api/pendingapprovalbyothers', async function (req, res) {
 
 
 app.use('/api/certificate-verification-by-nfc/:id',async function (req, res) {
-  let server = http.createServer(function(req, res){
-  console.log(req)
+//   let server = http.createServer(function(req, res){
+//   console.log(req)
   
-})
+// })
   let apiKey = req.headers.token;
   let host = req.headers.host;
   
   if(apiKey=== 'e5e43310-eb68-4ff5-9015-a0174c7d7668-authentific'){
-    const nfcId = req.params.id;
-    console.log(nfcId)
+    const identifier = req.params.id;
+   
     const nfcTag = (await resolvePromise(await app.models.NFCTag.findOne({
-      where: { identifier: nfcId,isDamaged:false }
+      where: { identifier: identifier,isDamaged:false }
     })));
 
     console.log(nfcTag)
@@ -416,8 +416,20 @@ app.use('/api/certificate-verification-by-nfc/:id',async function (req, res) {
       }
 
       const newNfcToken = await app.models.NFCTagVerificationToken.create(dataToSave);
+      console.log('newNfcToken')
       console.log(newNfcToken)
+      const scanData = {
+        certificateId:nfcTag.certificateId,
+        instituteId:nfcTag.instituteId,
+        nfcId:nfcTag.id
+      }
+      console.log('scanData')
+      console.log(scanData)
+      await app.models.NFCTagScan.create(scanData);
+
       res.status(200).send(newNfcToken);
+    }else{
+      res.status(500).send("Unauthorized");
     }
   }else{
     res.status(500).send("Unauthorized");

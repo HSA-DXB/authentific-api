@@ -6,6 +6,9 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "TimeStamp": true
+  },
   "properties": {
     "success": {
       "type": "Boolean",
@@ -31,7 +34,7 @@
         "nestRemoting": true
       }
     },
-    "nfcTag": {
+    "NFCTag": {
       "type": "belongsTo",
       "model": "NFCTag",
       "foreignKey": "nfcId",

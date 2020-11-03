@@ -4,7 +4,7 @@ module.exports = function(NFCTagVerificationToken) {
 
     NFCTagVerificationToken.verify = async function (token, options) {
         try {
-            const TEN_MIUNTES =10 * 60 * 1000
+            const TEN_MIUNTES =2 * 60 * 1000
             console.log(Date.now() + TEN_MIUNTES);
             const result = await resolvePromise(await NFCTagVerificationToken.findOne({
                 where: {

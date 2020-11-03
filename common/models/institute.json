@@ -149,6 +149,14 @@
         "nestRemoting": true
       }
     },
+    "NFCTagScans": {
+      "type": "hasMany",
+      "model": "NFCTagScan",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
     "activityLogs": {
       "type": "hasMany",
       "model": "ActivityLog",
