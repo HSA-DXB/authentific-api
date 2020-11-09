@@ -197,6 +197,9 @@ module.exports = function (Institute) {
         metrics['staffCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Staff.count({ instituteId: institute }));
         metrics['certificateCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count({ instituteId: institute }));
         metrics['nfcTagsCount'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ instituteId: institute }));
+        metrics['nfcTagsCountUsed'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ instituteId: institute, isDamaged:false, isAssigned:true }));
+        metrics['nfcTagsCountUnused'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ instituteId: institute, isDamaged:false, isAssigned:false }));
+        metrics['nfcTagsCountDamaged'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ instituteId: institute, isDamaged:true }));
         metrics['stockCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Paper.count({ instituteId: institute }));
         metrics['damagedStockCount'] = (await ReturnWithResolvedPromise(await Institute.app.models.Paper.count(
             { instituteId: institute, isDamaged: true })));
