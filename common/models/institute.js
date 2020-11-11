@@ -207,7 +207,96 @@ module.exports = function (Institute) {
 
 
         return metrics;
+    };
 
+
+
+    Institute.getMetricsByAdmin = async (userId) => {
+        let metrics = {};
+
+        metrics['voidedCertificatesCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count(
+            { and: [{ isVoid: true }, { isVoid: { neq: null } }] }));
+        metrics['printedCertificatesCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count(
+            { and: [{ isPrinted: true }, { isPrinted: { neq: null } }] }));
+        metrics['pendingApprovalsCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count(
+            { and: [{ or: [{ isApproved: false }, { isApproved: null }] }] }));
+        metrics['candidateCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Candidate.count());
+        metrics['certificationCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certification.count());
+        metrics['approvedCertificates'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count({
+            isApproved: true
+        }
+        ));
+
+
+
+
+        metrics['pendingReport'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count({
+            isApproved: true,
+            isReportGenerated:false
+        }
+        ));
+        metrics['generatedReport'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count({
+            isApproved: true,
+            isReportGenerated:true
+        }
+        ));
+
+        //region  count_waiting_for_my_approval
+
+        const staff = await ReturnWithResolvedPromise(await Institute.app.models.Staff.findById(userId,
+            { include: [{ certifications: ['certificates'] }] }));
+
+
+        const certifications = await awaitableCallback(staff.certifications);
+        metrics['waitingForMyApproval'] = 0;
+        metrics['revenue'] = 0;
+
+        for (let certification of certifications) {
+
+            for (const certificate of await awaitableCallback(certification.certificates)) {
+                // console.log('certificate', certificate);
+                if (!certificate.isApproved) {
+                    const approvedByMe = (await resolvePromise(await Institute.app.models.Approval.count(
+                        { certificateId: certificate.id, staffId: userId }
+                    )));
+
+                    if (approvedByMe < 1) {
+
+                        metrics['waitingForMyApproval'] += 1;
+                    }
+
+                    // console.log('is approved by me', approvedByMe);
+                    // console.log('waiting', metrics['waitingForMyApproval']);
+
+
+                } else if (certificate.isPrinted && certification.price) {
+                    metrics['revenue'] += certification.price;
+
+                }
+
+
+            }
+        }
+        if (metrics['revenue'] >= 1000) {
+            metrics['revenue'] = (metrics['revenue'] / 1000) + 'K';
+        } else if (metrics['revenue'] >= 1000000) {
+            metrics['revenue'] = (metrics['revenue'] / 1000000) + 'Mil';
+        }
+
+        //endregion
+
+
+        metrics['staffCategoryCount'] = await ReturnWithResolvedPromise(await Institute.app.models.StaffCategory.count());
+        metrics['staffCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Staff.count());
+        metrics['certificateCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count());
+        metrics['nfcTagsCount'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count());
+        metrics['stockCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Paper.count());
+        metrics['damagedStockCount'] = (await ReturnWithResolvedPromise(await Institute.app.models.Paper.count(
+            { isDamaged: true })));
+
+
+        metrics['verifications'] = (await ReturnWithResolvedPromise(await Institute.app.models.Verification.count()));
+        return metrics;
     };
 
     Institute.remoteMethod('getMetrics', {
@@ -216,6 +305,12 @@ module.exports = function (Institute) {
         http: { path: '/get-metrics', verb: 'get' }
     });
 
+
+    Institute.remoteMethod('getMetricsByAdmin', {
+        accepts: [{ arg: 'userId', type: 'string' }],
+        returns: { arg: 'data', type: 'Object', root: true },
+        http: { path: '/get-metrics-by-admin', verb: 'get' }
+    });
 };
 
 
