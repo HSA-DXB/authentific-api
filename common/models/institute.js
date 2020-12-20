@@ -200,6 +200,7 @@ module.exports = function (Institute) {
         metrics['nfcTagsCountUsed'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ instituteId: institute, isDamaged:false, isAssigned:true }));
         metrics['nfcTagsCountUnused'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ instituteId: institute, isDamaged:false, isAssigned:false }));
         metrics['nfcTagsCountDamaged'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ instituteId: institute, isDamaged:true }));
+        metrics['nfcTagsCountScan'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTagScan.count({ instituteId: institute}));
         metrics['stockCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Paper.count({ instituteId: institute }));
         metrics['damagedStockCount'] = (await ReturnWithResolvedPromise(await Institute.app.models.Paper.count(
             { instituteId: institute, isDamaged: true })));
@@ -216,7 +217,7 @@ module.exports = function (Institute) {
 
     Institute.getMetricsByAdmin = async (userId) => {
         let metrics = {};
-
+        metrics['institutionCount'] = await ReturnWithResolvedPromise(await Institute.count());
         metrics['voidedCertificatesCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count(
             { and: [{ isVoid: true }, { isVoid: { neq: null } }] }));
         metrics['printedCertificatesCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count(
@@ -293,6 +294,10 @@ module.exports = function (Institute) {
         metrics['staffCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Staff.count());
         metrics['certificateCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Certificate.count());
         metrics['nfcTagsCount'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count());
+        metrics['damagedNfcTagsCount'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ isDamaged: true }));
+        metrics['assignedNfcTagsCount'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ isDamaged: false,isAssigned:true}));
+        metrics['unassignedNfcTagsCount'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ isDamaged: false,isAssigned:false,nfcId:{ "neq":  "" }}));
+        metrics['newGeneratedNfcTagsCount'] = await ReturnWithResolvedPromise(await Institute.app.models.NFCTag.count({ isDamaged: false,nfcId:"" }));
         metrics['stockCount'] = await ReturnWithResolvedPromise(await Institute.app.models.Paper.count());
         metrics['damagedStockCount'] = (await ReturnWithResolvedPromise(await Institute.app.models.Paper.count(
             { isDamaged: true })));

@@ -29,6 +29,11 @@
       "type": "Boolean",
       "default":false
     },
+    "isDamagedReason": {
+      "type": "string",
+      "required": false,
+      "default":""
+    },
     "shortUrlInfo": {
       "type": "Object",
       "required":false
