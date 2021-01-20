@@ -56,6 +56,11 @@ module.exports = function (Staff) {
         }
 
         try {
+
+            console.log("===================")
+            console.log(ctx.data)
+            console.log(ctx.data.yubikeyId)
+
             const yub = require('yub');
 
 
@@ -63,8 +68,8 @@ module.exports = function (Staff) {
 
 
             yub.verify(ctx.data.yubikeyId, function (err, response) {
-                // console.log('Yubi err', err)
-                // console.log('YubiResponse', response.identity)
+                console.log('Yubi err', err)
+                console.log('YubiResponse', response.identity)
 
                 if (response && response.valid) {
                     console.log(response.identity);
