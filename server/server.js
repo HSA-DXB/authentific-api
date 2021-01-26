@@ -44,7 +44,7 @@ let list = ['1','2','3'];
 let urls=[];
   list.forEach(element => {
     var sendData = {
-      "long_url": "https://dev.bitly.com"+element, 
+      "long_url": "https://dev.bitly.com"+element,
       "domain": "bit.ly"
     }
     var dataString = JSON.stringify(sendData);
@@ -266,18 +266,18 @@ app.use('/api/pending-certificate/pendingapprovalbyothers/:certificationId/:id',
 
   let result = [];
   //certificates that i approved but are still not approved
-  
+
   let certificationId = req.params.certificationId;
   let id = req.params.id;
 
   // const certification = await awaitableCallback(id);
   // const certificate = await awaitableCallback(certification.certificates);
 
- 
+
   const approvalAuthor = (await resolvePromise(await app.models.StaffCertification.find({
     where: { certificationId: certificationId }
   })));
-  
+
 
   let approvedByOther = [];
   let allAwaitingAuthors = "";
@@ -295,7 +295,7 @@ app.use('/api/pending-certificate/pendingapprovalbyothers/:certificationId/:id',
       let authorDetails = (await resolvePromise(await app.models.Staff.find({
         where: { _id: author.staffId }
       })));
-     
+
       allAwaitingAuthors += authorDetails[0].firstName + ' ' + authorDetails[0].lastName;
       if (count !== 1 && count < totalApprovalAuthor) {
         allAwaitingAuthors += ', ';
@@ -303,7 +303,7 @@ app.use('/api/pending-certificate/pendingapprovalbyothers/:certificationId/:id',
     }
   }
   // certificate.awaitingApprove = allAwaitingAuthors;
-  
+
 
   const approvedByMe = (await resolvePromise(await app.models.Approval.find({
     where: { certificateId: id, staffId: req.currentUser.id }
@@ -374,7 +374,7 @@ app.use('/api/pendingapprovalbyothers', async function (req, res) {
         const approvedByMe = (await resolvePromise(await app.models.Approval.find({
           where: { certificateId: certificate.id, staffId: req.currentUser.id }
         })));
-          
+
         if (approvedByMe.length > 0 && allAwaitingAuthors!='') {
           result.push(certificate);
         }
@@ -393,14 +393,14 @@ app.use('/api/pendingapprovalbyothers', async function (req, res) {
 app.use('/api/certificate-verification-by-nfc/:id',async function (req, res) {
 //   let server = http.createServer(function(req, res){
 //   console.log(req)
-  
+
 // })
   let apiKey = req.headers.token;
   let host = req.headers.host;
-  
+
   if(apiKey=== 'e5e43310-eb68-4ff5-9015-a0174c7d7668-authentific'){
     const identifier = req.params.id;
-   
+
     const nfcTag = (await resolvePromise(await app.models.NFCTag.findOne({
       where: { identifier: identifier,isDamaged:false }
     })));
@@ -408,7 +408,7 @@ app.use('/api/certificate-verification-by-nfc/:id',async function (req, res) {
     console.log(nfcTag)
     if(nfcTag && nfcTag.certificateId){
       const tokgen = new TokenGenerator(256, TokenGenerator.BASE62); // Default is a 128-bit token encoded in base58
-    
+
       const dataToSave = {
         nfcTagId:nfcTag.id,
         token:tokgen.generate(),
@@ -434,8 +434,8 @@ app.use('/api/certificate-verification-by-nfc/:id',async function (req, res) {
   }else{
     res.status(500).send("Unauthorized");
   }
-    
-    
+
+
 
 });
 
@@ -458,6 +458,33 @@ app.use('/api/sendEmail', function (req, res) {
       '<strong>TEAM AUTHENTIFIC</strong>',
   };
   sgMail.send(msg);
+});
+
+app.use('/api/2FA/:to/verify-token/:code', function (req, res) {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const client = require('twilio')(accountSid, authToken);
+
+  client.verify.services('VA7c8ee0f552059a57254012561686786d')
+    .verificationChecks
+    .create({to: req.params.to, code: req.params.code})
+    .then(verification_check => {
+      console.log(verification_check.status)
+      if (verification_check.status === "approved") {
+        // update model field: verified2FA
+        res.status(200).json({
+          success: true,
+          message: "Approved successfully.",
+          data: verification_check
+        })
+      } else {
+        res.status(400).json({
+          success: false,
+          message: "Something went wrong.",
+          data: verification_check
+        })
+      }
+    });
 });
 
 // Bootstrap the application, configure models, datasources and middleware.
