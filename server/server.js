@@ -16,6 +16,9 @@ var request = require('request');
 var bodyParser = require('body-parser');
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 1000000 }));
+require('dotenv').config();
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 
 app.start = function () {
 
@@ -461,8 +464,6 @@ app.use('/api/sendEmail', function (req, res) {
 });
 
 app.use('/api/2FA/:to/verify-token/:code', function (req, res) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
   const client = require('twilio')(accountSid, authToken);
 
   client.verify.services('VA7c8ee0f552059a57254012561686786d')
@@ -485,6 +486,33 @@ app.use('/api/2FA/:to/verify-token/:code', function (req, res) {
         })
       }
     });
+});
+
+app.use('/api/2FA/send-verify-token', function (req, res) {
+  try {
+    const client = require('twilio')(accountSid, authToken);
+
+    client.verify.services('VA7c8ee0f552059a57254012561686786d')
+      .verifications
+      .create({to: req.body.numberToUseIn2FA, channel: 'sms'})
+      .then(verification => {
+        console.log("========verification=======")
+        console.log(verification)
+        console.log("========verification=======")
+        // response return
+        res.status(200).json({
+          success: true,
+          message: "Sent successfully.",
+          data: verification
+        })
+      });
+  } catch (e) {
+      res.status(500).json({
+        success: false,
+        message: "Something went wrong.",
+        err: e
+      })
+  }
 });
 
 // Bootstrap the application, configure models, datasources and middleware.

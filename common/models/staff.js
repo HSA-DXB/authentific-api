@@ -1,6 +1,9 @@
 'use strict';
 const VerifyYubiKey = require('../VerifyYubikey');
 const ObjectId = require('mongodb');
+require('dotenv').config();
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 
 module.exports = function (Staff) {
   Staff.afterRemote('confirm', function (context, client, next) {
@@ -169,6 +172,27 @@ module.exports = function (Staff) {
     }
   }
 
+  const sendAVerificationToken = (staff) => {
+    if (staff.require2FA !== undefined && staff.require2FA) {
+      console.log("========i see=======")
+      if (staff.verified2FA !== undefined && !staff.verified2FA) {
+        console.log("========i see 2=======", accountSid, authToken)
+        const client = require('twilio')(accountSid, authToken);
+        console.log("========going=======")
+        client.verify.services('VA7c8ee0f552059a57254012561686786d')
+          .verifications
+          .create({to: staff.numberToUseIn2FA, channel: 'sms'})
+          .then(verification => {
+            console.log("========verification=======")
+            console.log(verification)
+            console.log("========verification=======")
+            // response return
+            return verification
+          });
+      }
+    }
+  }
+
   Staff.afterRemote('login', async function (context, token, next) {
     // console.log('hello world')
     try {
@@ -184,21 +208,8 @@ module.exports = function (Staff) {
       2FA functionality starts
       */
 
-      if (staff.require2FA) {
-        if (!staff.verified2FA) {
-          const accountSid = process.env.TWILIO_ACCOUNT_SID;
-          const authToken = process.env.TWILIO_AUTH_TOKEN;
-          const client = require('twilio')(accountSid, authToken);
-
-          client.verify.services('VA7c8ee0f552059a57254012561686786d')
-            .verifications
-            .create({to: staff.numberToUseIn2FA, channel: 'sms'})
-            .then(verification => {
-              console.log(verification.status)
-              // response return
-            });
-        }
-      }
+      const result = await sendAVerificationToken(staff)
+      console.log("result:", result)
 
       /*
       2FA functionality ends
@@ -245,8 +256,8 @@ module.exports = function (Staff) {
 
 
     } catch (e) {
-
-      // console.log(e)
+      console.log("printtttttttttttttttttt")
+      console.log(e)
       return next(new Error(e));
     }
 
