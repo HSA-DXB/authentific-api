@@ -208,8 +208,8 @@ module.exports = function (Staff) {
       2FA functionality starts
       */
 
-      const result = await sendAVerificationToken(staff)
-      console.log("result:", result)
+      // const result = await sendAVerificationToken(staff)
+      // console.log("result:", result)
 
       /*
       2FA functionality ends

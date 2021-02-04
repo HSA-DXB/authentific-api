@@ -463,14 +463,15 @@ app.use('/api/sendEmail', function (req, res) {
   sgMail.send(msg);
 });
 
-app.use('/api/2FA/:to/verify-token/:code', function (req, res) {
+app.use('/api/2FA/verify-token', function (req, res) {
+  console.log("i see haw maw kaw")
   const client = require('twilio')(accountSid, authToken);
 
   client.verify.services('VA7c8ee0f552059a57254012561686786d')
     .verificationChecks
-    .create({to: req.params.to, code: req.params.code})
+    .create({to: req.body.to, code: req.body.code})
     .then(verification_check => {
-      console.log(verification_check.status)
+      console.log(verification_check)
       if (verification_check.status === "approved") {
         // update model field: verified2FA
         res.status(200).json({
@@ -479,19 +480,28 @@ app.use('/api/2FA/:to/verify-token/:code', function (req, res) {
           data: verification_check
         })
       } else {
-        res.status(400).json({
+        res.status(500).json({
           success: false,
           message: "Something went wrong.",
-          data: verification_check
+          err: "Invalid code"
         })
       }
-    });
+    }).catch(err => {
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong.",
+      err: err
+    })
+  });
 });
 
 app.use('/api/2FA/send-verify-token', function (req, res) {
+  console.log('i see req to send verify token')
   try {
     const client = require('twilio')(accountSid, authToken);
-
+    console.log("========going=======")
+    console.log(req.body)
+    console.log("========going=======")
     client.verify.services('VA7c8ee0f552059a57254012561686786d')
       .verifications
       .create({to: req.body.numberToUseIn2FA, channel: 'sms'})
@@ -505,8 +515,17 @@ app.use('/api/2FA/send-verify-token', function (req, res) {
           message: "Sent successfully.",
           data: verification
         })
-      });
+      }).catch((err) => {
+      res.status(500).json({
+        success: false,
+        message: "Something went wrong.",
+        err: err
+      })
+    });
   } catch (e) {
+      console.log("========verification=======")
+      console.log(e)
+      console.log("========verification=======")
       res.status(500).json({
         success: false,
         message: "Something went wrong.",
