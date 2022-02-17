@@ -48,11 +48,13 @@
   "devDependencies": {
     "commitizen": "^2.9.6",
     "cz-customizable-te": "^5.1.0",
+    "dotenv": "^8.2.0",
     "eslint": "^3.17.1",
     "eslint-config-loopback": "^8.0.0",
     "eslint-plugin-react": "^7.16.0",
     "nodemon": "^1.19.4",
-    "nsp": "^2.1.0"
+    "nsp": "^2.1.0",
+    "twilio": "^3.55.0"
   },
   "config": {
     "commitizen": {

@@ -31,6 +31,18 @@
     "requireYubikey": {
       "type": "Boolean",
       "default": false
+    },
+    "require2FA": {
+      "type": "Boolean",
+      "default": false
+    },
+    "numberToUseIn2FA": {
+      "type": "String",
+      "default": null
+    },
+    "verified2FA": {
+      "type": "Boolean",
+      "default": false
     }
   },
   "validations": [],
