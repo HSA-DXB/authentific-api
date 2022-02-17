@@ -55,12 +55,12 @@ let urls=[];
         headers: headers,
         body: dataString
     };
-    request(options,async function(error,response, body){
-      urls.push(JSON.parse(body))
-      if(list.length==urls.length){
-        res.send(urls)
-      }
-    });
+    // request(options,async function(error,response, body){
+    //   urls.push(JSON.parse(body))
+    //   if(list.length==urls.length){
+    //     res.send(urls)
+    //   }
+    // });
   });
 });
 
