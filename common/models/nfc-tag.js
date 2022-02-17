@@ -19,7 +19,7 @@ module.exports = function (Nfctag) {
             for (let i = 0; i < length; i++) {
                 let identifier = short.generate();
                 var sendData = {
-                    "long_url": "http://34.123.39.143?pid=" + identifier,
+                    "long_url": "http://34.123.66.81/?pid=" + identifier,
                     "domain": "bit.ly"
                 }
                 var dataString = JSON.stringify(sendData);
