@@ -1,11 +1,12 @@
 "use strict";
 const resolvePromise = require("../ResolvePromise");
+const Nfctag = require("./nfc-tag");
 module.exports = function (NFCTagVerificationToken) {
   NFCTagVerificationToken.verify = async function (token, options) {
     try {
       const TEN_MIUNTES = 2 * 60 * 1000;
       console.log(Date.now() + TEN_MIUNTES);
-      const result = await resolvePromise(
+      let result = await resolvePromise(
         await NFCTagVerificationToken.findOne({
           where: {
             token: token,
@@ -13,8 +14,18 @@ module.exports = function (NFCTagVerificationToken) {
           },
         })
       );
-      console.log({ result });
-      return result;
+      if (result) {
+        const nfcProperties = await resolvePromise(
+          await NFCTagVerificationToken.app.models.NFCTag.findById(
+            result.nfcTagId
+          )
+        );
+        result.nfcId = nfcProperties.nfcId;
+        // result = { ...result, ...nfcProperties };
+        return result;
+      } else {
+        return result;
+      }
     } catch (e) {
       console.log(e);
       return e;
