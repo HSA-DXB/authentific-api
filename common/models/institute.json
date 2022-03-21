@@ -62,6 +62,16 @@
       "required": true,
       "default": "1"
     },
+    "blockchainAddress": {
+      "type": "string",
+      "required": true,
+      "default": ""
+    },
+    "blockchainFees": {
+      "type": "number",
+      "required": true,
+      "default": 0
+    },
     "font": {
       "type": "string",
       "default": ""
@@ -144,15 +154,6 @@
     "NFCTags": {
       "type": "hasMany",
       "model": "NFCTag",
-      "foreignKey": "instituteId",
-      "options": {
-        "nestRemoting": true
-      }
-    },
-
-    "Blockchains": {
-      "type": "hasMany",
-      "model": "Blockchain",
       "foreignKey": "instituteId",
       "options": {
         "nestRemoting": true
