@@ -1,0 +1,41 @@
+{
+  "name": "blockchain",
+  "plural": "blockchains",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": false
+  },
+  "properties": {
+    "address": {
+      "type": "string",
+      "required": true,
+      "default": ""
+    },
+    "fees": {
+      "type": "number",
+      "required": true,
+      "default": 0
+    }
+  },
+  "validations": [],
+  "relations": {
+    "institute": {
+      "type": "belongsTo",
+      "model": "Institute",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
+  "acls": [
+    {
+      "accessType": "WRITE",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

@@ -149,6 +149,15 @@
         "nestRemoting": true
       }
     },
+
+    "Blockchains": {
+      "type": "hasMany",
+      "model": "Blockchain",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
     "NFCTagScans": {
       "type": "hasMany",
       "model": "NFCTagScan",
