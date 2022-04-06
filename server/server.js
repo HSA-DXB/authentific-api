@@ -485,7 +485,7 @@ app.use('/api/sendTransactionHistoryToMail', function (req, res) {
     ]
   };
   try {
-    // sgMail.send(msg);
+     sgMail.send(msg);
     res.status(200).json("Mail sent")
   } catch (error) {
     console.log(error)
