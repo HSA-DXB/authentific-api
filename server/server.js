@@ -470,15 +470,18 @@ app.use('/api/sendEmail', function (req, res) {
 app.use('/api/sendTransactionHistoryToMail', function (req, res) {
   const sgMail = require('@sendgrid/mail');
   sgMail.setApiKey('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');
+  console.log(req.currentUser)
   const msg = {
     to: req.currentUser.email,
     from: 'noreply@authentific.com.au',
-    subject: 'Authentific Blockchain Transaction Recipt',
-    html: '',
+    subject: 'Blockchain Transaction Alert',
+    html: `Dear ${req.currentUser.firstName} ${req.currentUser.lastName || ''},
+    Please find enclosed your blockchain transaction receipt in PDF format. You can download, save, print and access your blockchain transaction receipt anytime you wish.
+   Thank you`,
     attachments: [
       {
         content: req.body.pdf,
-        filename: "Blockchain Transaction Recipt.pdf",
+        filename: "Blockchain Transaction Receipt.pdf",
         type: "application/pdf",
         disposition: "attachment"
       }
