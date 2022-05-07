@@ -72,6 +72,16 @@
       "required": true,
       "default": 0
     },
+    "isBlockchainUser": {
+      "type": "Boolean",
+      "default": true,
+      "required": true
+    },
+    "isAuthentificUser": {
+      "type": "Boolean",
+      "default": false,
+      "required": true
+    },
     "font": {
       "type": "string",
       "default": ""
