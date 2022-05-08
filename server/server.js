@@ -17,8 +17,12 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 1000000 }));
 require('dotenv').config();
+const path = require('path')
+
+const fs = require('fs')
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
+
 
 app.start = function () {
 
@@ -461,6 +465,36 @@ app.use('/api/sendEmail', function (req, res) {
       '<strong>TEAM AUTHENTIFIC</strong>',
   };
   sgMail.send(msg);
+});
+
+app.use('/api/sendTransactionHistoryToMail', function (req, res) {
+  const sgMail = require('@sendgrid/mail');
+  sgMail.setApiKey('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');
+  console.log(req.currentUser)
+  const msg = {
+    to: req.currentUser.email,
+    from: 'noreply@authentific.com.au',
+    subject: 'Blockchain Transaction Alert',
+    html: `Dear ${req.currentUser.firstName} ${req.currentUser.lastName || ''},
+    Please find enclosed your blockchain transaction receipt in PDF format. You can download, save, print and access your blockchain transaction receipt anytime you wish.
+   Thank you`,
+    attachments: [
+      {
+        content: req.body.pdf,
+        filename: "Blockchain Transaction Receipt.pdf",
+        type: "application/pdf",
+        disposition: "attachment"
+      }
+    ]
+  };
+  try {
+     sgMail.send(msg);
+    res.status(200).json("Mail sent")
+  } catch (error) {
+    console.log(error)
+    res.status(400).json("Something went wrong!")
+  }
+  
 });
 
 app.use('/api/2FA/verify-token', function (req, res) {
