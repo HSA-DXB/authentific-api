@@ -1,66 +1,68 @@
-'use strict';
+"use strict";
 
-var loopback = require('loopback');
-var boot = require('loopback-boot');
-var bodyParser = require('body-parser');
-var UAParser = require('ua-parser-js');
-const publicIp = require('public-ip');
-const awaitableCallback = require('../common/awaitableCallback');
-const resolvePromise = require('../common/ResolvePromise');
-const scheduleBackupJob = require('../scheduler/scheduleBackup')
-const TokenGenerator = require('uuid-token-generator');
-var app = module.exports = loopback();
-var http = require('http');
-var GoogleUrl = require( 'google-url' );
-var request = require('request');
-var bodyParser = require('body-parser');
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 1000000 }));
-require('dotenv').config();
-const path = require('path')
+var loopback = require("loopback");
+var boot = require("loopback-boot");
+var bodyParser = require("body-parser");
+var UAParser = require("ua-parser-js");
+const publicIp = require("public-ip");
+const awaitableCallback = require("../common/awaitableCallback");
+const resolvePromise = require("../common/ResolvePromise");
+const scheduleBackupJob = require("../scheduler/scheduleBackup");
+const TokenGenerator = require("uuid-token-generator");
+var app = (module.exports = loopback());
+var http = require("http");
+var GoogleUrl = require("google-url");
+var request = require("request");
+var bodyParser = require("body-parser");
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 1000000,
+  })
+);
+require("dotenv").config();
+const path = require("path");
 
-const fs = require('fs')
+const fs = require("fs");
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 
-
 app.start = function () {
-
-  scheduleBackupJob()
+  scheduleBackupJob();
   // start the web server
   return app.listen(function () {
-    app.emit('started');
-    var baseUrl = app.get('url').replace(/\/$/, '');
+    app.emit("started");
+    var baseUrl = app.get("url").replace(/\/$/, "");
     // console.log('Authentific is listening at: %s', baseUrl);
-    if (app.get('loopback-component-explorer')) {
-      var explorerPath = app.get('loopback-component-explorer').mountPath;
+    if (app.get("loopback-component-explorer")) {
+      var explorerPath = app.get("loopback-component-explorer").mountPath;
       // console.log('Browse Authentific Api at %s%s', baseUrl, explorerPath);
     }
   });
 };
 
-app.use('/api/createShortUrl', function (req, res) {
+app.use("/api/createShortUrl", function (req, res) {
   var headers = {
-    'Authorization': 'Bearer 52100c01812625ce4ab7da0eef221381411ca990',
-    'Content-Type': 'application/json'
-};
+    Authorization: "Bearer 52100c01812625ce4ab7da0eef221381411ca990",
+    "Content-Type": "application/json",
+  };
 
-
-
-let list = ['1','2','3'];
-let urls=[];
-  list.forEach(element => {
+  let list = ["1", "2", "3"];
+  let urls = [];
+  list.forEach((element) => {
     var sendData = {
-      "long_url": "https://dev.bitly.com"+element,
-      "domain": "bit.ly"
-    }
+      long_url: "https://dev.bitly.com" + element,
+      domain: "bit.ly",
+    };
     var dataString = JSON.stringify(sendData);
 
     var options = {
-        url: 'https://api-ssl.bitly.com/v4/shorten',
-        method: 'POST',
-        headers: headers,
-        body: dataString
+      url: "https://api-ssl.bitly.com/v4/shorten",
+      method: "POST",
+      headers: headers,
+      body: dataString,
     };
     // request(options,async function(error,response, body){
     //   urls.push(JSON.parse(body))
@@ -70,7 +72,6 @@ let urls=[];
     // });
   });
 });
-
 
 // Retrieve the currently authenticated user
 app.use(async function (req, res, next) {
@@ -87,80 +88,84 @@ app.use(async function (req, res, next) {
 
   // Now, if there is a tokenId, use it to look up the currently authenticated
   // user and attach it to the app
-  req['currentUser'] = false;
+  req["currentUser"] = false;
   if (tokenId) {
     var UserModel = app.models.Staff;
 
     // Logic borrowed from user.js -> User.logout()
-    UserModel.relations.accessTokens.modelTo.findById(tokenId, function (err, accessToken) {
-      if (err) return next(err);
-      if (!accessToken) return next(new Error('could not find accessToken'));
-
-      // Look up the user associated with the accessToken
-
-      // dont worry that we are getting so much data, i.e certificates etc.
-      // they are just promise functions, not actual data is returned until the promise is resolved
-      UserModel.findById(accessToken.userId, { include: ['staffCategory', { certifications: [{ certificates: ['candidate', 'approvals', 'certification'] }] }] }, function (err, user) {
+    UserModel.relations.accessTokens.modelTo.findById(
+      tokenId,
+      function (err, accessToken) {
         if (err) return next(err);
-        if (!user) return next(new Error('could not find a valid user'));
+        if (!accessToken) return next(new Error("could not find accessToken"));
 
+        // Look up the user associated with the accessToken
 
-        req['currentUser'] = user;
+        // dont worry that we are getting so much data, i.e certificates etc.
+        // they are just promise functions, not actual data is returned until the promise is resolved
+        UserModel.findById(
+          accessToken.userId,
+          {
+            include: [
+              "staffCategory",
+              {
+                certifications: [
+                  { certificates: ["candidate", "approvals", "certification"] },
+                ],
+              },
+            ],
+          },
+          function (err, user) {
+            if (err) return next(err);
+            if (!user) return next(new Error("could not find a valid user"));
 
+            req["currentUser"] = user;
 
-        let activity = {};
+            let activity = {};
 
+            let urlSplits = req.originalUrl.split("?")[0].split("/");
 
-        let urlSplits = req.originalUrl.split('?')[0].split('/');
+            activity["staffId"] = user.id;
+            // activity['table'] = req;
 
-        activity['staffId'] = user.id;
-        // activity['table'] = req;
+            activity["instituteId"] = user.instituteId;
+            const parser = new UAParser(req.headers["user-agent"]);
 
-        activity['instituteId'] = user.instituteId;
-        const parser = new UAParser(req.headers['user-agent']);
+            activity["os"] = parser.getOS().name;
 
+            activity["browser"] = parser.getBrowser().name;
 
-        activity['os'] = parser.getOS().name;
+            publicIp.v4().then(async (ip) => {
+              activity["ip"] = ip;
 
-        activity['browser'] = parser.getBrowser().name;
+              let u1 = urlSplits[2];
+              let u2 = urlSplits[3];
+              let u3 = urlSplits[4];
+              let u4 = urlSplits[5];
 
+              if (u3) {
+                activity["table"] = u3;
+                if (u4) {
+                  activity["row"] = u4;
+                }
+              } else if (u1) {
+                activity["table"] = u1;
+                if (u2) {
+                  activity["row"] = u2;
+                }
+              }
 
-        publicIp.v4().then(async ip => {
-          activity['ip'] = ip;
+              activity["action"] = req.method;
 
+              let savedActivity = await app.models.ActivityLog.create(activity);
+              // console.log('user', req.currentUser.certifications)
+            });
 
-          let u1 = urlSplits[2];
-          let u2 = urlSplits[3];
-          let u3 = urlSplits[4];
-          let u4 = urlSplits[5];
-
-
-          if (u3) {
-            activity['table'] = u3;
-            if (u4) {
-              activity['row'] = u4;
-            }
-
-          } else if (u1) {
-            activity['table'] = u1;
-            if (u2) {
-              activity['row'] = u2;
-            }
+            next();
           }
-
-
-          activity['action'] = req.method;
-
-
-          let savedActivity = await app.models.ActivityLog.create(activity);
-          // console.log('user', req.currentUser.certifications)
-
-        });
-
-        next();
-      });
-
-    });
+        );
+      }
+    );
   }
 
   // If no tokenId was found, continue without waiting
@@ -169,21 +174,24 @@ app.use(async function (req, res, next) {
   }
 });
 
-app.use('/api/getwaitingformyapproval', async function (req, res) {
+app.use("/api/getwaitingformyapproval", async function (req, res) {
   let result = [];
   //certificates that i approved but are still not approved
   // console.clear()
   let certifications = await awaitableCallback(req.currentUser.certifications);
 
-
   for (const certification of certifications) {
     const certificates = await awaitableCallback(certification.certificates);
     for (const certificate of certificates) {
-
       if (!certificate.isApproved) {
-        const approvedByMe = (await resolvePromise(await app.models.Approval.find({
-          where: { certificateId: certificate.id, staffId: req.currentUser.id }
-        })));
+        const approvedByMe = await resolvePromise(
+          await app.models.Approval.find({
+            where: {
+              certificateId: certificate.id,
+              staffId: req.currentUser.id,
+            },
+          })
+        );
 
         if (!approvedByMe || approvedByMe.length < 1) {
           result.push(certificate);
@@ -194,162 +202,163 @@ app.use('/api/getwaitingformyapproval', async function (req, res) {
   res.status(200).send(result);
 });
 
-app.use('/api/checkRemainingCertificateApproval', async function (req, res) {
+app.use("/api/checkRemainingCertificateApproval", async function (req, res) {
   const certificateId = req.body.certificateId;
-  const certificate = (await resolvePromise(await app.models.Certificate.findById(certificateId)));
-  const staffCertifications = (await resolvePromise(await app.models.StaffCertification.find({
-    where: { certificationId: certificate.certificationId }
-  })));
-  const approvals = (await resolvePromise(await app.models.Approval.find({
-    where: { certificateId: certificateId }
-  })));
+  const certificate = await resolvePromise(
+    await app.models.Certificate.findById(certificateId)
+  );
+  const staffCertifications = await resolvePromise(
+    await app.models.StaffCertification.find({
+      where: { certificationId: certificate.certificationId },
+    })
+  );
+  const approvals = await resolvePromise(
+    await app.models.Approval.find({
+      where: { certificateId: certificateId },
+    })
+  );
   // console.log(staffCertifications.length, approvals.length)
   if (staffCertifications.length === approvals.length) {
-    certificate.updateAttribute('isApproved', true);
+    certificate.updateAttribute("isApproved", true);
   }
   res.status(200).send({ success: true });
 });
 
-
 async function handleCertificates(approvals, req, res) {
-
-
   if (!approvals || approvals.length < 1) {
     // console.log('No certificates');
-    res.status(204).send({ err: 'No Content.' });
+    res.status(204).send({ err: "No Content." });
     return;
   }
 
   let result = [];
   let index = 1;
   try {
-    approvals.forEach(async approval => {
+    approvals.forEach(async (approval) => {
       let tempApproval1 = Object.assign({}, approval).__data;
 
+      let certificate = await resolvePromise(
+        await app.models.Approval.relations.certificate.modelTo.findById(
+          approval.certificateId
+        )
+      );
 
-      let certificate = await resolvePromise(await app.models.Approval.relations.certificate.modelTo.findById(approval.certificateId));
-
-
-      tempApproval1['certificate'] = certificate;
+      tempApproval1["certificate"] = certificate;
       if (tempApproval1.certificate !== null) {
-
-
-        let candidate = await resolvePromise(await app.models.Certificate.relations.candidate.modelTo.findById(tempApproval1.certificate.candidateId));
+        let candidate = await resolvePromise(
+          await app.models.Certificate.relations.candidate.modelTo.findById(
+            tempApproval1.certificate.candidateId
+          )
+        );
         {
+          let tempApproval2 = Object.assign({}, tempApproval1);
 
-          let tempApproval2 = Object.assign({}, tempApproval1)
+          tempApproval2["candidate"] = candidate;
 
+          let certification = await resolvePromise(
+            await app.models.Certificate.relations.certification.modelTo.findById(
+              tempApproval2.certificate.certificationId
+            )
+          );
+          let tempApproval3 = Object.assign({}, tempApproval2);
+          tempApproval3["certification"] = certification;
 
-          tempApproval2['candidate'] = candidate;
-
-
-          let certification = await resolvePromise(await app.models.Certificate.relations.certification.modelTo.findById(tempApproval2.certificate.certificationId));
-          let tempApproval3 = Object.assign({}, tempApproval2)
-          tempApproval3['certification'] = certification;
-
-          result.push(tempApproval3)
+          result.push(tempApproval3);
 
           if (index === approvals.length) {
-
             res.status(200).send(result);
             return;
-
           }
           index += 1;
-
-
         }
       }
     });
   } catch (e) {
     // console.log('Exception', e)
-    res.status(501).send(e)
+    res.status(501).send(e);
   }
-
 }
 
+app.use(
+  "/api/pending-certificate/pendingapprovalbyothers/:certificationId/:id",
+  async function (req, res) {
+    let result = [];
+    //certificates that i approved but are still not approved
 
-app.use('/api/pending-certificate/pendingapprovalbyothers/:certificationId/:id', async function (req, res) {
+    let certificationId = req.params.certificationId;
+    let id = req.params.id;
 
-  let result = [];
-  //certificates that i approved but are still not approved
+    // const certification = await awaitableCallback(id);
+    // const certificate = await awaitableCallback(certification.certificates);
 
-  let certificationId = req.params.certificationId;
-  let id = req.params.id;
+    const approvalAuthor = await resolvePromise(
+      await app.models.StaffCertification.find({
+        where: { certificationId: certificationId },
+      })
+    );
 
-  // const certification = await awaitableCallback(id);
-  // const certificate = await awaitableCallback(certification.certificates);
+    let approvedByOther = [];
+    let allAwaitingAuthors = "";
+    let totalApprovalAuthor = approvalAuthor.length;
+    let count = 0;
 
+    for (const author of approvalAuthor) {
+      count++;
 
-  const approvalAuthor = (await resolvePromise(await app.models.StaffCertification.find({
-    where: { certificationId: certificationId }
-  })));
+      approvedByOther = await resolvePromise(
+        await app.models.Approval.find({
+          where: { certificateId: id, staffId: author.staffId },
+        })
+      );
 
+      if (approvedByOther.length < 1) {
+        let authorDetails = await resolvePromise(
+          await app.models.Staff.find({
+            where: { _id: author.staffId },
+          })
+        );
 
-  let approvedByOther = [];
-  let allAwaitingAuthors = "";
-  let totalApprovalAuthor = approvalAuthor.length;
-  let count = 0;
-
-  for (const author of approvalAuthor) {
-    count++;
-
-    approvedByOther = (await resolvePromise(await app.models.Approval.find({
-      where: { certificateId: id, staffId: author.staffId }
-    })));
-
-    if (approvedByOther.length < 1) {
-      let authorDetails = (await resolvePromise(await app.models.Staff.find({
-        where: { _id: author.staffId }
-      })));
-
-      allAwaitingAuthors += authorDetails[0].firstName + ' ' + authorDetails[0].lastName;
-      if (count !== 1 && count < totalApprovalAuthor) {
-        allAwaitingAuthors += ', ';
+        allAwaitingAuthors +=
+          authorDetails[0].firstName + " " + authorDetails[0].lastName;
+        if (count !== 1 && count < totalApprovalAuthor) {
+          allAwaitingAuthors += ", ";
+        }
       }
     }
+    // certificate.awaitingApprove = allAwaitingAuthors;
+
+    const approvedByMe = await resolvePromise(
+      await app.models.Approval.find({
+        where: { certificateId: id, staffId: req.currentUser.id },
+      })
+    );
+
+    if (approvedByMe.length > 0 && allAwaitingAuthors == "") {
+      result.push(id);
+    }
+
+    res.status(200).send(result);
   }
-  // certificate.awaitingApprove = allAwaitingAuthors;
-
-
-  const approvedByMe = (await resolvePromise(await app.models.Approval.find({
-    where: { certificateId: id, staffId: req.currentUser.id }
-  })));
-
-
-  if (approvedByMe.length > 0 && allAwaitingAuthors=='') {
-    result.push(id);
-  }
-
-  res.status(200).send(result);
-}
 );
 
-
-
-
-
-
-app.use('/api/pendingapprovalbyothers', async function (req, res) {
-
+app.use("/api/pendingapprovalbyothers", async function (req, res) {
   let result = [];
   //certificates that i approved but are still not approved
-  console.clear()
+  console.clear();
   let certifications = await awaitableCallback(req.currentUser.certifications);
 
   for (const certification of certifications) {
-
     // for (const certificate of certification.certificates) {
     const certificates = await awaitableCallback(certification.certificates);
 
     for (const certificate of certificates) {
-
       let awaitingApprove = [];
       if (!certificate.isApproved) {
-
-        const approvalAuthor = (await resolvePromise(await app.models.StaffCertification.find({
-          where: { certificationId: certificate.certificationId }
-        })));
+        const approvalAuthor = await resolvePromise(
+          await app.models.StaffCertification.find({
+            where: { certificationId: certificate.certificationId },
+          })
+        );
 
         let approvedByOther = [];
         let allAwaitingAuthors = "";
@@ -359,16 +368,21 @@ app.use('/api/pendingapprovalbyothers', async function (req, res) {
         for (const author of approvalAuthor) {
           count++;
 
-          approvedByOther = (await resolvePromise(await app.models.Approval.find({
-            where: { certificateId: certificate.id, staffId: author.staffId }
-          })));
+          approvedByOther = await resolvePromise(
+            await app.models.Approval.find({
+              where: { certificateId: certificate.id, staffId: author.staffId },
+            })
+          );
           if (approvedByOther.length < 1) {
-            let authorDetails = (await resolvePromise(await app.models.Staff.find({
-              where: { _id: author.staffId }
-            })));
-            allAwaitingAuthors += authorDetails[0].firstName + ' ' + authorDetails[0].lastName;
+            let authorDetails = await resolvePromise(
+              await app.models.Staff.find({
+                where: { _id: author.staffId },
+              })
+            );
+            allAwaitingAuthors +=
+              authorDetails[0].firstName + " " + authorDetails[0].lastName;
             if (count !== 1 && count < totalApprovalAuthor) {
-              allAwaitingAuthors += ', ';
+              allAwaitingAuthors += ", ";
             }
           }
         }
@@ -378,104 +392,114 @@ app.use('/api/pendingapprovalbyothers', async function (req, res) {
         //     // result.push(certificate);
         // }
 
-        const approvedByMe = (await resolvePromise(await app.models.Approval.find({
-          where: { certificateId: certificate.id, staffId: req.currentUser.id }
-        })));
+        const approvedByMe = await resolvePromise(
+          await app.models.Approval.find({
+            where: {
+              certificateId: certificate.id,
+              staffId: req.currentUser.id,
+            },
+          })
+        );
 
-        if (approvedByMe.length > 0 && allAwaitingAuthors!='') {
+        if (approvedByMe.length > 0 && allAwaitingAuthors != "") {
           result.push(certificate);
         }
         // console.log('approvals', await resolvePromise(await app.models.Approval.find({certificateId: certificate.id})));
-
       }
       // }
     }
-
   }
   res.status(200).send(result);
-}
-);
+});
 
+app.use("/api/certificate-verification-by-nfc/:id", async function (req, res) {
+  //   let server = http.createServer(function(req, res){
+  //   console.log(req)
 
-app.use('/api/certificate-verification-by-nfc/:id',async function (req, res) {
-//   let server = http.createServer(function(req, res){
-//   console.log(req)
-
-// })
+  // })
   let apiKey = req.headers.token;
   let host = req.headers.host;
 
-  if(apiKey=== 'e5e43310-eb68-4ff5-9015-a0174c7d7668-authentific'){
+  if (apiKey === "e5e43310-eb68-4ff5-9015-a0174c7d7668-authentific") {
     const identifier = req.params.id;
 
-    const nfcTag = (await resolvePromise(await app.models.NFCTag.findOne({
-      where: { identifier: identifier,isDamaged:false }
-    })));
+    const nfcTag = await resolvePromise(
+      await app.models.NFCTag.findOne({
+        where: { identifier: identifier, isDamaged: false },
+      })
+    );
 
-    console.log(nfcTag)
-    if(nfcTag && nfcTag.certificateId){
+    console.log(nfcTag);
+    if (nfcTag && nfcTag.certificateId) {
       const tokgen = new TokenGenerator(256, TokenGenerator.BASE62); // Default is a 128-bit token encoded in base58
 
       const dataToSave = {
-        nfcTagId:nfcTag.id,
-        token:tokgen.generate(),
-        certificateId:nfcTag.certificateId
-      }
+        nfcTagId: nfcTag.id,
+        token: tokgen.generate(),
+        certificateId: nfcTag.certificateId,
+      };
 
-      const newNfcToken = await app.models.NFCTagVerificationToken.create(dataToSave);
-      console.log('newNfcToken')
-      console.log(newNfcToken)
+      const newNfcToken = await app.models.NFCTagVerificationToken.create(
+        dataToSave
+      );
+      console.log("newNfcToken");
+      console.log(newNfcToken);
       const scanData = {
-        certificateId:nfcTag.certificateId,
-        instituteId:nfcTag.instituteId,
-        nfcId:nfcTag.id
-      }
-      console.log('scanData')
-      console.log(scanData)
+        certificateId: nfcTag.certificateId,
+        instituteId: nfcTag.instituteId,
+        nfcId: nfcTag.id,
+      };
+      console.log("scanData");
+      console.log(scanData);
       await app.models.NFCTagScan.create(scanData);
 
       res.status(200).send(newNfcToken);
-    }else{
+    } else {
       res.status(500).send("Unauthorized");
     }
-  }else{
+  } else {
     res.status(500).send("Unauthorized");
   }
-
-
-
 });
 
-
-
-
-app.use('/api/sendEmail', function (req, res) {
-  const sgMail = require('@sendgrid/mail');
-  sgMail.setApiKey('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');
+app.use("/api/sendEmail", function (req, res) {
+  const sgMail = require("@sendgrid/mail");
+  sgMail.setApiKey(
+    "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"
+  );
   const msg = {
     to: req.body.to,
-    from: 'noreply@authentific.com.au',
-    subject: 'Authentific Account Credentials',
-    html: 'Dear ' +req.body.firstName + ', <br>Thank You for creating account at <strong>Authentific</strong>. ' +
-      'Please login using the following credentials at <strong>Authentific</strong>.<br>' +
-      '<strong>Email: </strong>'+ req.body.to + '<br>' +
-      '<strong>Password: </strong>' + req.body.password + '<br>' +
-      'Have a good day<br>' +
-      '<strong>Regards</strong>,<br>' +
-      '<strong>TEAM AUTHENTIFIC</strong>',
+    from: "noreply@authentific.com.au",
+    subject: "Authentific Account Credentials",
+    html:
+      "Dear " +
+      req.body.firstName +
+      ", <br>Thank You for creating account at <strong>Authentific</strong>. " +
+      "Please login using the following credentials at <strong>Authentific</strong>.<br>" +
+      "<strong>Email: </strong>" +
+      req.body.to +
+      "<br>" +
+      "<strong>Password: </strong>" +
+      req.body.password +
+      "<br>" +
+      "Have a good day<br>" +
+      "<strong>Regards</strong>,<br>" +
+      "<strong>TEAM AUTHENTIFIC</strong>",
   };
   sgMail.send(msg);
 });
 
-app.use('/api/sendTransactionHistoryToMail', function (req, res) {
-  const sgMail = require('@sendgrid/mail');
-  sgMail.setApiKey('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');
-  console.log(req.currentUser)
+app.use("/api/sendTransactionHistoryToMail", function (req, res) {
+  const sgMail = require("@sendgrid/mail");
+  sgMail.setApiKey(
+    "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"
+  );
+  console.log(req.currentUser);
   const msg = {
     to: req.currentUser.email,
-    from: 'noreply@authentific.com.au',
-    subject: 'Blockchain Transaction Alert',
-    html: `Dear ${req.currentUser.firstName} ${req.currentUser.lastName || ''},
+    from: "noreply@authentific.com.au",
+    subject: "Blockchain Transaction Alert",
+    html: `Dear ${req.currentUser.firstName} ${req.currentUser.lastName || ""},
     Please find enclosed your blockchain transaction receipt in PDF format. You can download, save, print and access your blockchain transaction receipt anytime you wish.
    Thank you`,
     attachments: [
@@ -483,88 +507,120 @@ app.use('/api/sendTransactionHistoryToMail', function (req, res) {
         content: req.body.pdf,
         filename: "Blockchain Transaction Receipt.pdf",
         type: "application/pdf",
-        disposition: "attachment"
-      }
-    ]
+        disposition: "attachment",
+      },
+    ],
   };
   try {
-     sgMail.send(msg);
-    res.status(200).json("Mail sent")
+    sgMail.send(msg);
+    res.status(200).json("Mail sent");
   } catch (error) {
-    console.log(error)
-    res.status(400).json("Something went wrong!")
+    console.log(error);
+    res.status(400).json("Something went wrong!");
   }
-  
 });
 
-app.use('/api/2FA/verify-token', function (req, res) {
-  console.log("i see haw maw kaw")
-  const client = require('twilio')(accountSid, authToken);
+app.use("/api/sendCertificateToMail", function (req, res) {
+  const sgMail = require("@sendgrid/mail");
+  sgMail.setApiKey(
+    "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"
+  );
+  console.log(req.body, "eeeeeeeeeeeeeeeeeeee");
+  const msg = {
+    to: req.body.email,
+    from: "noreply@authentific.com.au",
+    subject: "Certificate",
+    html: `Dear ${req.currentUser.firstName} ${req.currentUser.lastName || ""},
+    Please find enclosed your blockchain transaction receipt in PDF format. You can download, save, print and access your blockchain transaction receipt anytime you wish.
+   Thank you`,
+    attachments: [
+      {
+        content: req.body.pdf,
+        filename: "Blockchain Transaction Receipt.pdf",
+        type: "application/pdf",
+        disposition: "attachment",
+      },
+    ],
+  };
+  try {
+    sgMail.send(msg);
+    res.status(200).json("Mail sent successfully");
+  } catch (error) {
+    console.log(error);
+    res.status(400).json("Something went wrong!");
+  }
+});
 
-  client.verify.services('VA7c8ee0f552059a57254012561686786d')
-    .verificationChecks
-    .create({to: req.body.to, code: req.body.code})
-    .then(verification_check => {
-      console.log(verification_check)
+app.use("/api/2FA/verify-token", function (req, res) {
+  console.log("i see haw maw kaw");
+  const client = require("twilio")(accountSid, authToken);
+
+  client.verify
+    .services("VA7c8ee0f552059a57254012561686786d")
+    .verificationChecks.create({ to: req.body.to, code: req.body.code })
+    .then((verification_check) => {
+      console.log(verification_check);
       if (verification_check.status === "approved") {
         // update model field: verified2FA
         res.status(200).json({
           success: true,
           message: "Approved successfully.",
-          data: verification_check
-        })
+          data: verification_check,
+        });
       } else {
         res.status(500).json({
           success: false,
           message: "Something went wrong.",
-          err: "Invalid code"
-        })
+          err: "Invalid code",
+        });
       }
-    }).catch(err => {
-    res.status(500).json({
-      success: false,
-      message: "Something went wrong.",
-      err: err
     })
-  });
+    .catch((err) => {
+      res.status(500).json({
+        success: false,
+        message: "Something went wrong.",
+        err: err,
+      });
+    });
 });
 
-app.use('/api/2FA/send-verify-token', function (req, res) {
-  console.log('i see req to send verify token')
+app.use("/api/2FA/send-verify-token", function (req, res) {
+  console.log("i see req to send verify token");
   try {
-    const client = require('twilio')(accountSid, authToken);
-    console.log("========going=======")
-    console.log(req.body)
-    console.log("========going=======")
-    client.verify.services('VA7c8ee0f552059a57254012561686786d')
-      .verifications
-      .create({to: req.body.numberToUseIn2FA, channel: 'sms'})
-      .then(verification => {
-        console.log("========verification=======")
-        console.log(verification)
-        console.log("========verification=======")
+    const client = require("twilio")(accountSid, authToken);
+    console.log("========going=======");
+    console.log(req.body);
+    console.log("========going=======");
+    client.verify
+      .services("VA7c8ee0f552059a57254012561686786d")
+      .verifications.create({ to: req.body.numberToUseIn2FA, channel: "sms" })
+      .then((verification) => {
+        console.log("========verification=======");
+        console.log(verification);
+        console.log("========verification=======");
         // response return
         res.status(200).json({
           success: true,
           message: "Sent successfully.",
-          data: verification
-        })
-      }).catch((err) => {
-      res.status(500).json({
-        success: false,
-        message: "Something went wrong.",
-        err: err
+          data: verification,
+        });
       })
-    });
+      .catch((err) => {
+        res.status(500).json({
+          success: false,
+          message: "Something went wrong.",
+          err: err,
+        });
+      });
   } catch (e) {
-      console.log("========verification=======")
-      console.log(e)
-      console.log("========verification=======")
-      res.status(500).json({
-        success: false,
-        message: "Something went wrong.",
-        err: e
-      })
+    console.log("========verification=======");
+    console.log(e);
+    console.log("========verification=======");
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong.",
+      err: e,
+    });
   }
 });
 
@@ -573,9 +629,6 @@ app.use('/api/2FA/send-verify-token', function (req, res) {
 boot(app, __dirname, function (err) {
   if (err) throw err;
 
-
   // start the server if `$ node server.js`
-  if (require.main === module)
-    app.start();
+  if (require.main === module) app.start();
 });
-
