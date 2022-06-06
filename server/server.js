@@ -525,18 +525,16 @@ app.use("/api/sendCertificateToMail", function (req, res) {
   sgMail.setApiKey(
     "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"
   );
-  console.log(req.body, "eeeeeeeeeeeeeeeeeeee");
   const msg = {
     to: req.body.email,
     from: "noreply@authentific.com.au",
-    subject: "Certificate",
-    html: `Dear ${req.currentUser.firstName} ${req.currentUser.lastName || ""},
-    Please find enclosed your blockchain transaction receipt in PDF format. You can download, save, print and access your blockchain transaction receipt anytime you wish.
-   Thank you`,
+    subject: `Your ${req.body.documentName} is now stored securely on Blockchain`,
+    html: `Dear Customer,
+    Please find enclosed your ${req.body.documentName} in PDF format. You can download, save, print and instantly verify your document by going to http://app.authentific.com.au.s3-website-us-west-2.amazonaws.com/verify-certificate `,
     attachments: [
       {
         content: req.body.pdf,
-        filename: "Blockchain Transaction Receipt.pdf",
+        filename: req.body.documentName,
         type: "application/pdf",
         disposition: "attachment",
       },
