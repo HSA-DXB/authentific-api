@@ -43,6 +43,10 @@
     "verified2FA": {
       "type": "Boolean",
       "default": false
+    },
+    "blockchainAddress": {
+      "type": "String",
+      "default": null
     }
   },
   "validations": [],
