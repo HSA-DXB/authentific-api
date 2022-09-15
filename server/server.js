@@ -14,6 +14,7 @@ var http = require("http");
 var GoogleUrl = require("google-url");
 var request = require("request");
 var bodyParser = require("body-parser");
+const stytch = require("stytch");
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(
   bodyParser.urlencoded({
@@ -28,7 +29,11 @@ const path = require("path");
 const fs = require("fs");
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-
+const client = new stytch.Client({
+  project_id: process.env.STYTCH_PROJECT_ID,
+  secret: process.env.STYTCH_PROJECT_SECRET,
+  env: stytch.envs.test,
+});
 app.start = function () {
   scheduleBackupJob();
   // start the web server
@@ -614,6 +619,39 @@ app.use("/api/2FA/send-verify-token", function (req, res) {
     console.log("========verification=======");
     console.log(e);
     console.log("========verification=======");
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong.",
+      err: e,
+    });
+  }
+});
+
+app.use("/api/login-magic-link", function (req, res) {
+  try {
+    app.models.Staff.find({
+      where: { email: req.body.email },
+    })
+      .then(() => {
+        const params = {
+          email: req.body.email,
+          login_magic_link_url: process.env.MAGIC_LINK_URL,
+          signup_magic_link_url: process.env.MAGIC_LINK_URL,
+        };
+        client.magicLinks.email
+          .loginOrCreate(params)
+          .then(res.json("emailSent"))
+          .catch((err) => {
+            // on failure, log the error then render the homepage
+            console.log(err);
+            res.json(err);
+          });
+      })
+      .catch(() => {
+        res.status(400).json("userNotFound");
+      });
+  } catch (e) {
+    console.log(e);
     res.status(500).json({
       success: false,
       message: "Something went wrong.",

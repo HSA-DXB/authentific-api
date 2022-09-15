@@ -3,6 +3,7 @@ const VerifyYubiKey = require("../VerifyYubikey");
 const ObjectId = require("mongodb");
 require("dotenv").config();
 const stytch = require("stytch");
+const e = require("cors");
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 
@@ -15,6 +16,35 @@ module.exports = function (Staff) {
   Staff.afterRemote("confirm", function (context, client, next) {
     const res = context.res;
     res.redirect("http://google.be");
+  });
+
+  Staff.beforeRemote("login", async function (context, credentials, next) {
+    console.log({ magicLink, credentials, context });
+    try {
+      const magicLink = await client.magicLinks.authenticate(credentials.token);
+
+      if (magicLink) {
+        const staff = await Staff.find({
+          where: { email: magicLink.user.emails[0].email },
+        });
+
+        if (staff) {
+          credentials.email = magicLink.user.emails[0].email;
+          credentials.password = 123456789;
+          console.log({ magicLink, staff, credentials, context });
+          next();
+        } else {
+          return e;
+        }
+      } else {
+        return e;
+      }
+    } catch (e) {
+      return e;
+    }
+
+    return null;
+    // Invoke the default login function
   });
 
   Staff.observe("before save", async function (ctx, next) {
@@ -185,16 +215,10 @@ module.exports = function (Staff) {
   };
 
   Staff.afterRemote("login", async function (context, token, next) {
-    console.log(context.args.credentials);
-    let err = new Error();
-    err.message = "Yubikey Missing in Auth.";
-    err.status = 401;
-    return next(err);
     try {
       const yub = require("yub");
 
       yub.init("41713", "NR+uycIuvGoA1Wh/VmF2eGx2CqQ=");
-
       let staff = await Staff.findById(token.userId);
       console.log(staff);
 
@@ -241,7 +265,6 @@ module.exports = function (Staff) {
         return;
       }
     } catch (e) {
-      console.log("printtttttttttttttttttt");
       console.log(e);
       return next(new Error(e));
     }
@@ -293,30 +316,6 @@ module.exports = function (Staff) {
     }
   });
 
-  // Staff.login = async function (credentials, include, callback) {
-  //     try {
-  //         delete credentials.recaptchaReactive;
-  //         console.log(credentials)
-  //         let loginToken = await Staff.login(credentials, include);
-  //         console.log(loginToken)
-  //
-  //         console.log('hello login')
-  //         // If needed, here we can use loginToken.userId to retrieve
-  //         // the user from the datasource
-  //         let user = await Staff.findById(loginToken.userId);
-  //
-  //         console.log('looing for user', user)
-  //         if (user) {
-  //             return loginToken;
-  //         }
-  //     } catch (e) {
-  //         return e;
-  //     }
-  //
-  //     return null;
-  //     // Invoke the default login function
-  //
-  // };
   //
   //
   // /** Register a path for the new login function
