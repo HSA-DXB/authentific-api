@@ -19,9 +19,12 @@ module.exports = function (Staff) {
   });
 
   Staff.beforeRemote("login", async function (context, credentials, next) {
-    console.log({ magicLink, credentials, context });
+    console.log(context.req.body, "jelerjer");
+
     try {
-      const magicLink = await client.magicLinks.authenticate(credentials.token);
+      const magicLink = await client.magicLinks.authenticate(
+        context.req.body.token
+      );
 
       if (magicLink) {
         const staff = await Staff.find({
@@ -29,18 +32,24 @@ module.exports = function (Staff) {
         });
 
         if (staff) {
-          credentials.email = magicLink.user.emails[0].email;
-          credentials.password = 123456789;
-          console.log({ magicLink, staff, credentials, context });
+          context.req.body.email = magicLink.user.emails[0].email;
+          context.req.body.password = "123456789";
+          context.req.body.yubikey = "";
           next();
         } else {
-          return e;
+          let err = new Error();
+          err.message = "User Not Found";
+          err.status = 400;
+          return next(err);
         }
-      } else {
-        return e;
       }
     } catch (e) {
-      return e;
+      console.log({ e });
+      let err = new Error();
+      err.message =
+        "The magic link could not be authenticated because it was either already used or expired. Send another magic link to this user.";
+      err.status = 400;
+      return next(err);
     }
 
     return null;
@@ -220,8 +229,7 @@ module.exports = function (Staff) {
 
       yub.init("41713", "NR+uycIuvGoA1Wh/VmF2eGx2CqQ=");
       let staff = await Staff.findById(token.userId);
-      console.log(staff);
-
+      console.log({ token });
       /*
       2FA functionality starts
       */
