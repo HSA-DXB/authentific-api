@@ -525,21 +525,41 @@ app.use("/api/sendCertificateToMail", function (req, res) {
   sgMail.setApiKey(
     "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"
   );
-  const msg = {
-    to: req.body.email,
-    from: "noreply@authentific.com.au",
-    subject: `Your ${req.body.documentName} is now stored securely on Blockchain`,
-    html: `Dear Customer,
-    Please find enclosed your ${req.body.documentName} in PDF format. You can download, save, print and instantly verify your document by going to http://app.authentific.com.au.s3-website-us-west-2.amazonaws.com/verify-certificate `,
-    attachments: [
-      {
-        content: req.body.pdf,
-        filename: req.body.documentName,
-        type: "application/pdf",
-        disposition: "attachment",
-      },
-    ],
-  };
+  let msg;
+  if (req.body.type === "jpg") {
+    msg = {
+      to: req.body.email,
+      from: "noreply@authentific.com.au",
+      subject: `Your ${req.body.documentName} is now stored securely on Blockchain`,
+      html: `Dear Customer,
+      Please find enclosed your ${req.body.documentName} in PDF format. You can download, save, print and instantly verify your document by going to http://app.authentific.com.au.s3-website-us-west-2.amazonaws.com/verify-certificate `,
+      attachments: [
+        {
+          content: req.body.pdf,
+          filename: req.body.documentName + ".jpg",
+          type: "application/jpg",
+          disposition: "attachment",
+        },
+      ],
+    };
+  } else {
+    msg = {
+      to: req.body.email,
+      from: "noreply@authentific.com.au",
+      subject: `Your ${req.body.documentName} is now stored securely on Blockchain`,
+      html: `Dear Customer,
+      Please find enclosed your ${req.body.documentName} in PDF format. You can download, save, print and instantly verify your document by going to http://app.authentific.com.au.s3-website-us-west-2.amazonaws.com/verify-certificate `,
+      attachments: [
+        {
+          content: req.body.pdf,
+          filename: req.body.documentName + ".pdf",
+          type: "application/pdf",
+          disposition: "attachment",
+        },
+      ],
+    };
+  }
+
   try {
     sgMail.send(msg);
     res.status(200).json("Mail sent successfully");
