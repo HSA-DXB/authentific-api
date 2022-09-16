@@ -104,6 +104,7 @@ module.exports = function (Certificate) {
             result.print
           );
 
+        result.mobilePreview = `${process.env.AUTHENTIFIC_WEB_URL}certificate-preview?identifier=${result.identifier}&pin=${result.pin}`;
         result.imageUrl = url[0];
 
         return result;
