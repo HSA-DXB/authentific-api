@@ -4,15 +4,65 @@ const ObjectId = require('mongodb');
 require('dotenv').config();
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
+const stytch = require("stytch");
 
 module.exports = function (Staff) {
+  const client = new stytch.Client({
+    project_id: process.env.STYTCH_PROJECT_ID,
+    secret: process.env.STYTCH_PROJECT_SECRET,
+    env: stytch.envs.test,
+  });
+
+  Staff.beforeRemote('login', async function (context, client, next) {
+    console.log(context.req.body, "jelerjer");
+
+    try {
+      // const magicLink = await client.magicLinks.authenticate(
+      //   context.req.body.token
+      // );
+
+      // if (magicLink) {
+      //   const staff = await Staff.find({
+      //     where: { email: magicLink.user.emails[0].email },
+      //   });
+
+      //   if (staff) {
+      //     context.req.body.email = magicLink.user.emails[0].email;
+      //     context.req.body.password = "123456789";
+      //     context.req.body.yubikey = "";
+      //     next();
+      //   } else {
+      //     let err = new Error();
+      //     err.message = "User Not Found";
+      //     err.status = 400;
+      //     return next(err);
+      //   }
+      // }
+      context.args.credentials.email = 'iavro158@#gmail.com';
+      context.args.credentials.password = "123456789";
+      context.args.credentials.yubikey = "";
+      console.log(context)
+      next();
+
+    } catch (e) {
+      console.log({ e });
+      let err = new Error();
+      err.message =
+        "The magic link could not be authenticated because it was either already used or expired. Send another magic link to this user.";
+      err.status = 400;
+      return next(err);
+    }
+
+    return null;
+  });
+
   Staff.afterRemote('confirm', function (context, client, next) {
     const res = context.res;
     res.redirect('http://google.be');
   });
 
 
-  Staff.observe('before save', function (ctx, next) {
+  Staff.observe('before save',async function (ctx, next) {
     // console.log(ctx.instance)
     // if(ctx.instance.type=='superadmin'){
     //     let err = new Error();
@@ -20,6 +70,12 @@ module.exports = function (Staff) {
     //     err.status = 401
     //     return next(err);
     // }
+    async function stytchRegisterUser() {
+      return client.users.create({
+        email: ctx.instance.email,
+      });
+    }
+
     if (!ctx.isNewInstance) {
       let columnId = ctx.where.id;
       let accessId = ctx.options.accessToken.userId;
@@ -52,12 +108,18 @@ module.exports = function (Staff) {
 
 
     if (!ctx.data || !ctx.data.requireYubikey) {
-      return next();
+      try {
+        const res = await stytchRegisterUser();
+        ctx.instance.StytchData = res.user;
+        return next();
+      } catch (error) {
+        return next(new Error(e));
+      }
+
 
     }
 
     try {
-
       console.log('===================');
       console.log(ctx.data);
       console.log(ctx.data.yubikeyId);
