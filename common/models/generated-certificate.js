@@ -88,7 +88,7 @@ module.exports = function (Certificate) {
             isPrinted: true,
             isVoided: { neq: true },
           },
-          include: "candidate",
+          include: ["candidate", "certification"],
         })
       );
       // console.log(result);
