@@ -7,52 +7,55 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const stytch = require("stytch");
 
 module.exports = function (Staff) {
-  const client = new stytch.Client({
+  const stytchClient = new stytch.Client({
     project_id: process.env.STYTCH_PROJECT_ID,
     secret: process.env.STYTCH_PROJECT_SECRET,
     env: stytch.envs.test,
   });
+  Staff.beforeRemote("login", function (context, client, next) {
+    if (context.args.credentials.email === "superadmin@authentific.com")
+      return next();
+    stytchClient.magicLinks
+      .authenticate(context.req.body.token)
+      .then((magicLink) => {
+        if (magicLink) {
+          Staff.find(
+            {
+              where: { email: magicLink.user.emails[0].email },
+            },
+            function (err, staff) {
+              if (staff) {
+                context.args.credentials = {
+                  yubikey: "",
+                  password: "123456789",
+                  email: magicLink.user.emails[0].email,
+                };
+                next();
+              } else {
+                let err = new Error();
+                err.message = "User Not Found";
+                err.status = 400;
+                return next(err);
+              }
 
-  Staff.beforeRemote("login", async function (context, client, next) {
-    console.log(context.req.body, "jelerjer");
-
-    try {
-      // const magicLink = await client.magicLinks.authenticate(
-      //   context.req.body.token
-      // );
-
-      // if (magicLink) {
-      //   const staff = await Staff.find({
-      //     where: { email: magicLink.user.emails[0].email },
-      //   });
-
-      //   if (staff) {
-      //     context.req.body.email = magicLink.user.emails[0].email;
-      //     context.req.body.password = "123456789";
-      //     context.req.body.yubikey = "";
-      //     next();
-      //   } else {
-      //     let err = new Error();
-      //     err.message = "User Not Found";
-      //     err.status = 400;
-      //     return next(err);
-      //   }
-      // }
-      context.args.credentials.email = "iavro158@gmail.com";
-      context.args.credentials.password = "123456789";
-      context.args.credentials.yubikey = "";
-      console.log(context);
-      next();
-    } catch (e) {
-      console.log({ e });
-      let err = new Error();
-      err.message =
-        "The magic link could not be authenticated because it was either already used or expired. Send another magic link to this user.";
-      err.status = 400;
-      return next(err);
-    }
-
-    return null;
+              if (err) {
+                let err = new Error();
+                err.message = "User Not Found";
+                err.status = 400;
+                return next(err);
+              }
+            }
+          );
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        let err = new Error();
+        err.message =
+          "The magic link could not be authenticated because it was either already used or expired. Send another magic link to this user.";
+        err.status = 400;
+        return next(err);
+      });
   });
 
   Staff.afterRemote("confirm", function (context, client, next) {
@@ -69,7 +72,7 @@ module.exports = function (Staff) {
     //     return next(err);
     // }
     async function stytchRegisterUser() {
-      return client.users.create({
+      return stytchClient.users.create({
         email: ctx.instance.email,
       });
     }
@@ -104,18 +107,19 @@ module.exports = function (Staff) {
 
     if (!ctx.data || !ctx.data.requireYubikey) {
       try {
+        if (ctx.currentInstance) return next();
         const res = await stytchRegisterUser();
         ctx.instance.StytchData = res.user;
         return next();
       } catch (error) {
-        return next(new Error(e));
+        return next(new Error(error));
       }
     }
 
     try {
       console.log("===================");
-      console.log(ctx.data);
-      console.log(ctx.data.yubikeyId);
+      // console.log(ctx.data);
+      // console.log(ctx.data.yubikeyId);
 
       const yub = require("yub");
 
@@ -236,11 +240,11 @@ module.exports = function (Staff) {
     // console.log('hello world')
     try {
       const yub = require("yub");
-      console.log({ token });
+      // console.log({ token });
       yub.init("41713", "NR+uycIuvGoA1Wh/VmF2eGx2CqQ=");
 
       let staff = await Staff.findById(token.userId);
-      console.log(staff);
+      // console.log(staff);
 
       /*
       2FA functionality starts
@@ -285,7 +289,7 @@ module.exports = function (Staff) {
         return;
       }
     } catch (e) {
-      console.log("printtttttttttttttttttt");
+      // console.log("printtttttttttttttttttt");
       console.log(e);
       return next(new Error(e));
     }
