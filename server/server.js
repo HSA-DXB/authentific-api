@@ -17,8 +17,6 @@ var bodyParser = require("body-parser");
 app.use(bodyParser.json({ limit: "50mb" }));
 const stytch = require("stytch");
 
-
-
 app.use(
   bodyParser.urlencoded({
     limit: "50mb",
@@ -611,27 +609,28 @@ app.use("/api/2FA/verify-token", function (req, res) {
 });
 app.use("/api/login-magic-link", function (req, res) {
   try {
-    app.models.Staff.find({
-      where: { email: req.body.email },
-    })
-      .then(() => {
-        const params = {
-          email: req.body.email,
-          login_magic_link_url: process.env.MAGIC_LINK_URL,
-          signup_magic_link_url: process.env.MAGIC_LINK_URL,
-        };
-        client.magicLinks.email
-          .loginOrCreate(params)
-          .then(res.json("emailSent"))
-          .catch((err) => {
-            // on failure, log the error then render the homepage
-            console.log(err);
-            res.json(err);
-          });
-      })
-      .catch(() => {
-        res.status(400).json("userNotFound");
-      });
+    app.models.Staff.find(
+      {
+        where: { email: req.body.email },
+      },
+      function (err, staff) {
+        if (staff.length > 0) {
+          const params = {
+            email: req.body.email,
+            login_magic_link_url: process.env.MAGIC_LINK_URL,
+            signup_magic_link_url: process.env.MAGIC_LINK_URL,
+          };
+          client.magicLinks.email
+            .loginOrCreate(params)
+            .then(res.json("emailSent"))
+            .catch((err) => {
+              // on failure, log the error then render the homepage
+              console.log(err);
+              res.json(err);
+            });
+        } else res.status(400).json("User not found");
+      }
+    );
   } catch (e) {
     console.log(e);
     res.status(500).json({
