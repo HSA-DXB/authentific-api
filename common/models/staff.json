@@ -47,7 +47,12 @@
     "blockchainAddress": {
       "type": "String",
       "default": null
+    },
+    "stytchData": {
+      "type": "object",
+      "required": false
     }
+
   },
   "validations": [],
   "relations": {
