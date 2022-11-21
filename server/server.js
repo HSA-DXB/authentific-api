@@ -2,6 +2,7 @@
 
 var loopback = require("loopback");
 var boot = require("loopback-boot");
+require("dotenv").config();
 var bodyParser = require("body-parser");
 var UAParser = require("ua-parser-js");
 const publicIp = require("public-ip");
@@ -16,6 +17,11 @@ var request = require("request");
 var bodyParser = require("body-parser");
 app.use(bodyParser.json({ limit: "50mb" }));
 const stytch = require("stytch");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(
+  "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"
+);
 
 app.use(
   bodyParser.urlencoded({
@@ -24,7 +30,7 @@ app.use(
     parameterLimit: 1000000,
   })
 );
-require("dotenv").config();
+
 const path = require("path");
 
 const fs = require("fs");
@@ -469,10 +475,10 @@ app.use("/api/certificate-verification-by-nfc/:id", async function (req, res) {
 });
 
 app.use("/api/sendEmail", function (req, res) {
-  const sgMail = require("@sendgrid/mail");
-  sgMail.setApiKey(
-    "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"
-  );
+  // const sgMail = require("@sendgrid/mail");
+  // sgMail.setApiKey(
+  //   "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"
+  // );
   const msg = {
     to: req.body.to,
     from: "noreply@authentific.com.au",
@@ -496,10 +502,10 @@ app.use("/api/sendEmail", function (req, res) {
 });
 
 app.use("/api/sendTransactionHistoryToMail", function (req, res) {
-  const sgMail = require("@sendgrid/mail");
-  sgMail.setApiKey(
-    "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"
-  );
+  // const sgMail = require("@sendgrid/mail");
+  // sgMail.setApiKey(
+  //   "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"
+  // );
   console.log(req.currentUser);
   const msg = {
     to: req.currentUser.email,
@@ -527,10 +533,10 @@ app.use("/api/sendTransactionHistoryToMail", function (req, res) {
 });
 
 app.use("/api/sendCertificateToMail", function (req, res) {
-  const sgMail = require("@sendgrid/mail");
-  sgMail.setApiKey(
-    "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"
-  );
+  // const sgMail = require("@sendgrid/mail");
+  // sgMail.setApiKey(
+  //   "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"
+  // );
   let msg;
   if (req.body.type === "jpg") {
     msg = {
@@ -629,6 +635,50 @@ app.use("/api/login-magic-link", function (req, res) {
               res.json(err);
             });
         } else res.status(400).json("User not found");
+      }
+    );
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong.",
+      err: e,
+    });
+  }
+});
+
+app.use("/api/stripe-payment", function (req, res) {
+  const { payment_info, user_info } = req.body;
+  try {
+    stripe.charges.create(
+      {
+        amount: payment_info.amount,
+        currency: "USD",
+        description: "User registration",
+        source: payment_info.source,
+      },
+      (err, charge) => {
+        console.log(err);
+        if (err)
+          res
+            .status(500)
+            .json({ success: false, message: "Payment not completed." });
+        app.models.SignupUsers.create(
+          { ...user_info, payment_info: charge },
+          function (err, user) {
+            if (err) {
+              console.log(err);
+              res.status(500).json({
+                success: false,
+                message: "Something went wrong.",
+                err: err,
+              });
+            } else {
+              console.log(user);
+            }
+          }
+        );
+        res.status(200).json({ success: true, message: "Payment completed." });
       }
     );
   } catch (e) {

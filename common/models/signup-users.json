@@ -1,0 +1,52 @@
+{
+  "name": "SignupUsers",
+  "plural": "SignupUsers",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "mixins": {
+    "TimeStamp": true
+  },
+  "properties": {
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "lastName": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "string",
+      "required": true
+    },
+    "phoneNumber": {
+      "type": "string",
+      "required": true
+    },
+    "companyName": {
+      "type": "string",
+      "required": true
+    },
+    "designation": {
+      "type": "string",
+      "required": true
+    },
+    "officeLandlineNumber": {
+      "type": "string",
+      "required": true
+    },
+    "companyWebsite": {
+      "type": "String",
+      "required": true
+    },
+    "officeAddress": {
+      "type": "string",
+      "required": true
+    },
+    "paymentInfo": {}
+  },
+  "validations": [],
+
+  "acls": [],
+  "methods": {}
+}

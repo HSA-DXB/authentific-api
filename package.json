@@ -40,6 +40,7 @@
     "public-ip": "^2.4.0",
     "serve-favicon": "^2.0.1",
     "short-uuid": "^4.1.0",
+    "stripe": "^11.1.0",
     "strong-error-handler": "^2.0.0",
     "stytch": "^3.5.0",
     "ua-parser-js": "^0.7.19",
