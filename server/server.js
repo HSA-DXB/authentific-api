@@ -18,10 +18,6 @@ var bodyParser = require("body-parser");
 app.use(bodyParser.json({ limit: "50mb" }));
 const stytch = require("stytch");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const sgMail = require("@sendgrid/mail");
-sgMail.setApiKey(
-  "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"
-);
 
 app.use(
   bodyParser.urlencoded({
@@ -475,10 +471,10 @@ app.use("/api/certificate-verification-by-nfc/:id", async function (req, res) {
 });
 
 app.use("/api/sendEmail", function (req, res) {
-  // const sgMail = require("@sendgrid/mail");
-  // sgMail.setApiKey(
-  //   "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"
-  // );
+  const sgMail = require("@sendgrid/mail");
+  sgMail.setApiKey(
+    "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"
+  );
   const msg = {
     to: req.body.to,
     from: "noreply@authentific.com.au",
@@ -502,10 +498,10 @@ app.use("/api/sendEmail", function (req, res) {
 });
 
 app.use("/api/sendTransactionHistoryToMail", function (req, res) {
-  // const sgMail = require("@sendgrid/mail");
-  // sgMail.setApiKey(
-  //   "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"
-  // );
+  const sgMail = require("@sendgrid/mail");
+  sgMail.setApiKey(
+    "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"
+  );
   console.log(req.currentUser);
   const msg = {
     to: req.currentUser.email,
@@ -533,10 +529,10 @@ app.use("/api/sendTransactionHistoryToMail", function (req, res) {
 });
 
 app.use("/api/sendCertificateToMail", function (req, res) {
-  // const sgMail = require("@sendgrid/mail");
-  // sgMail.setApiKey(
-  //   "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"
-  // );
+  const sgMail = require("@sendgrid/mail");
+  sgMail.setApiKey(
+    "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"
+  );
   let msg;
   if (req.body.type === "jpg") {
     msg = {
@@ -647,7 +643,7 @@ app.use("/api/login-magic-link", function (req, res) {
   }
 });
 
-app.use("/api/stripe-payment", function (req, res) {
+app.use("/api/stripe-payment", function (req, res, next) {
   const { payment_info, user_info } = req.body;
   try {
     stripe.charges.create(
@@ -659,35 +655,113 @@ app.use("/api/stripe-payment", function (req, res) {
       },
       (err, charge) => {
         console.log(err);
-        if (err)
+        if (err) {
           res
-            .status(500)
+            .status(400)
             .json({ success: false, message: "Payment not completed." });
-        app.models.SignupUsers.create(
-          { ...user_info, payment_info: charge },
-          function (err, user) {
-            if (err) {
-              console.log(err);
-              res.status(500).json({
-                success: false,
-                message: "Something went wrong.",
-                err: err,
-              });
-            } else {
-              console.log(user);
+          next();
+        } else {
+          app.models.SignupUsers.create(
+            { ...user_info, payment_info: charge },
+            function (err, user) {
+              if (err) {
+                console.log(err);
+                res.status(500).json({
+                  success: false,
+                  message: "Something went wrong.",
+                  err: err,
+                });
+              } else {
+                const sgMail = require("@sendgrid/mail");
+                sgMail.setApiKey(
+                  "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"
+                );
+                const governmentIssuedIdContent =
+                  user_info.governmentIssuedId.value.split(",")[1];
+                const businessRegistrationCertificateContent =
+                  user_info.businessRegistrationCertificate.value.split(",")[1];
+                let msg = {
+                  to: "tony@workspaceit.com",
+                  from: "noreply@authentific.com.au",
+                  subject: `New user registered`,
+                  html: `Dear Admin,
+                A new user has been registered. Please find the details below:
+                <br>
+                <br>
+                <b>Name:</b> ${user_info.firstName + "" + user_info.lastName}
+                <br>
+                <b>Email:</b> ${user_info.email}
+                <br>
+                <b>Phone:</b> ${user_info.phoneNumber}
+                <br>
+                <b>Company:</b> ${user_info.companyName}
+                <br>
+                <b>Designation:</b> ${user_info.designation}
+                <br>
+                <b>Office Landline Number:</b> ${user_info.officeLandlineNumber}
+                <br>
+                <b>Company Website:</b> ${user_info.companyWebsite}
+                <br>
+                <b>Office Address:</b> ${user_info.officeAddress}
+                <br>
+                <b>Payment Status:</b> ${charge.status}
+                <br>
+                <b>Payment Amount:</b> ${charge.amount}
+                <br>
+                <b>Payment Currency:</b> ${charge.currency}
+                `,
+                  attachments: [
+                    {
+                      content: governmentIssuedIdContent,
+                      filename:
+                        "Government_Issue_ID" +
+                        `.${
+                          user_info.governmentIssuedId.type === "image/jpeg"
+                            ? "jpg"
+                            : "pdf"
+                        }`,
+                      type:
+                        user_info.governmentIssuedId.type === "image/jpeg"
+                          ? "application/jpg"
+                          : "application/pdf",
+                      disposition: "attachment",
+                    },
+                    {
+                      content: businessRegistrationCertificateContent,
+                      filename:
+                        "Business_Registration_Certificate" +
+                        `.${
+                          user_info.businessRegistrationCertificate.type ===
+                          "image/jpeg"
+                            ? "jpg"
+                            : "pdf"
+                        }`,
+                      type:
+                        user_info.businessRegistrationCertificate.type ===
+                        "image/jpeg"
+                          ? "application/jpg"
+                          : "application/pdf",
+                      disposition: "attachment",
+                    },
+                  ],
+                };
+                sgMail
+                  .send(msg)
+                  .then((res) => {})
+                  .catch((err) => {
+                    console.log(err, err.response.body);
+                  });
+              }
             }
-          }
-        );
-        res.status(200).json({ success: true, message: "Payment completed." });
+          );
+          res
+            .status(200)
+            .json({ success: true, message: "Payment completed." });
+        }
       }
     );
   } catch (e) {
     console.log(e);
-    res.status(500).json({
-      success: false,
-      message: "Something went wrong.",
-      err: e,
-    });
   }
 });
 
