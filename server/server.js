@@ -680,8 +680,74 @@ app.use("/api/stripe-payment", function (req, res, next) {
                   user_info.governmentIssuedId.value.split(",")[1];
                 const businessRegistrationCertificateContent =
                   user_info.businessRegistrationCertificate.value.split(",")[1];
-                let msg = {
-                  to: "tony@workspaceit.com",
+                let msg1 = {
+                  to: "adeel@authentific.com",
+                  from: "noreply@authentific.com.au",
+                  subject: `New user registered`,
+                  html: `Dear Admin,
+                A new user has been registered. Please find the details below:
+                <br>
+                <br>
+                <b>Name:</b> ${user_info.firstName + "" + user_info.lastName}
+                <br>
+                <b>Email:</b> ${user_info.email}
+                <br>
+                <b>Phone:</b> ${user_info.phoneNumber}
+                <br>
+                <b>Company:</b> ${user_info.companyName}
+                <br>
+                <b>Designation:</b> ${user_info.designation}
+                <br>
+                <b>Office Landline Number:</b> ${user_info.officeLandlineNumber}
+                <br>
+                <b>Company Website:</b> ${user_info.companyWebsite}
+                <br>
+                <b>Office Address:</b> ${user_info.officeAddress}
+                <br>
+                <b>Payment Status:</b> ${charge.status}
+                <br>
+                <b>Payment Amount:</b> ${charge.amount}
+                <br>
+                <b>Payment Currency:</b> ${charge.currency}
+                `,
+                  attachments: [
+                    {
+                      content: governmentIssuedIdContent,
+                      filename:
+                        "Government_Issue_ID" +
+                        `.${
+                          user_info.governmentIssuedId.type === "image/jpeg"
+                            ? "jpg"
+                            : "pdf"
+                        }`,
+                      type:
+                        user_info.governmentIssuedId.type === "image/jpeg"
+                          ? "application/jpg"
+                          : "application/pdf",
+                      disposition: "attachment",
+                    },
+                    {
+                      content: businessRegistrationCertificateContent,
+                      filename:
+                        "Business_Registration_Certificate" +
+                        `.${
+                          user_info.businessRegistrationCertificate.type ===
+                          "image/jpeg"
+                            ? "jpg"
+                            : "pdf"
+                        }`,
+                      type:
+                        user_info.businessRegistrationCertificate.type ===
+                        "image/jpeg"
+                          ? "application/jpg"
+                          : "application/pdf",
+                      disposition: "attachment",
+                    },
+                  ],
+                };
+
+                let msg2 = {
+                  to: "Haroonasghar@hsainternationalgroup.com",
                   from: "noreply@authentific.com.au",
                   subject: `New user registered`,
                   html: `Dear Admin,
@@ -746,7 +812,14 @@ app.use("/api/stripe-payment", function (req, res, next) {
                   ],
                 };
                 sgMail
-                  .send(msg)
+                  .send(msg1)
+                  .then((res) => {})
+                  .catch((err) => {
+                    console.log(err, err.response.body);
+                  });
+
+                sgMail
+                  .send(msg2)
                   .then((res) => {})
                   .catch((err) => {
                     console.log(err, err.response.body);
