@@ -540,7 +540,7 @@ app.use("/api/sendCertificateToMail", function (req, res) {
       from: "noreply@authentific.com.au",
       subject: `Your ${req.body.documentName} is now stored securely on Blockchain`,
       html: `Dear Customer,
-      Please find enclosed your ${req.body.documentName} in PDF format. You can download, save, print and instantly verify your document by going to http://app.authentific.com.au.s3-website-us-west-2.amazonaws.com/ `,
+      Please find enclosed your ${req.body.documentName} in PDF format. You can download, save, print and instantly verify your document by going to ${process.env.AUTHENTIFIC_WEB_URL} `,
       attachments: [
         {
           content: req.body.pdf,
@@ -556,7 +556,7 @@ app.use("/api/sendCertificateToMail", function (req, res) {
       from: "noreply@authentific.com.au",
       subject: `Your ${req.body.documentName} is now stored securely on Blockchain`,
       html: `Dear Customer,
-      Please find enclosed your ${req.body.documentName} in PDF format. You can download, save, print and instantly verify your document by going to http://app.authentific.com.au.s3-website-us-west-2.amazonaws.com/`,
+      Please find enclosed your ${req.body.documentName} in PDF format. You can download, save, print and instantly verify your document by going to ${process.env.AUTHENTIFIC_WEB_URL}`,
       attachments: [
         {
           content: req.body.pdf,
