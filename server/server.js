@@ -19,12 +19,14 @@ app.use(bodyParser.json({ limit: "50mb" }));
 const stytch = require("stytch");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
+const nodemailer = require("nodemailer");
+
 app.use(
   bodyParser.urlencoded({
     limit: "50mb",
     extended: true,
     parameterLimit: 1000000,
-  })
+  }),
 );
 
 const path = require("path");
@@ -37,6 +39,18 @@ const client = new stytch.Client({
   secret: process.env.STYTCH_PROJECT_SECRET,
   env: stytch.envs.test,
 });
+
+const transporter = nodemailer.createTransport({
+  service: process.env.MAIL_SERVICE,
+  host: process.env.MAIL_HOST,
+  port: process.env.MAIL_PORT,
+  auth: {
+    user: process.env.MAIL_USERNAME,
+    pass: process.env.MAIL_PASSWORD,
+  },
+  from: `"Authentific"<${process.env.MAIL_FROM_ADDRESS}>`,
+});
+
 app.start = function () {
   scheduleBackupJob();
   // start the web server
@@ -170,9 +184,9 @@ app.use(async function (req, res, next) {
             });
 
             next();
-          }
+          },
         );
-      }
+      },
     );
   }
 
@@ -198,7 +212,7 @@ app.use("/api/getwaitingformyapproval", async function (req, res) {
               certificateId: certificate.id,
               staffId: req.currentUser.id,
             },
-          })
+          }),
         );
 
         if (!approvedByMe || approvedByMe.length < 1) {
@@ -213,17 +227,17 @@ app.use("/api/getwaitingformyapproval", async function (req, res) {
 app.use("/api/checkRemainingCertificateApproval", async function (req, res) {
   const certificateId = req.body.certificateId;
   const certificate = await resolvePromise(
-    await app.models.Certificate.findById(certificateId)
+    await app.models.Certificate.findById(certificateId),
   );
   const staffCertifications = await resolvePromise(
     await app.models.StaffCertification.find({
       where: { certificationId: certificate.certificationId },
-    })
+    }),
   );
   const approvals = await resolvePromise(
     await app.models.Approval.find({
       where: { certificateId: certificateId },
-    })
+    }),
   );
   // console.log(staffCertifications.length, approvals.length)
   if (staffCertifications.length === approvals.length) {
@@ -247,16 +261,16 @@ async function handleCertificates(approvals, req, res) {
 
       let certificate = await resolvePromise(
         await app.models.Approval.relations.certificate.modelTo.findById(
-          approval.certificateId
-        )
+          approval.certificateId,
+        ),
       );
 
       tempApproval1["certificate"] = certificate;
       if (tempApproval1.certificate !== null) {
         let candidate = await resolvePromise(
           await app.models.Certificate.relations.candidate.modelTo.findById(
-            tempApproval1.certificate.candidateId
-          )
+            tempApproval1.certificate.candidateId,
+          ),
         );
         {
           let tempApproval2 = Object.assign({}, tempApproval1);
@@ -265,8 +279,8 @@ async function handleCertificates(approvals, req, res) {
 
           let certification = await resolvePromise(
             await app.models.Certificate.relations.certification.modelTo.findById(
-              tempApproval2.certificate.certificationId
-            )
+              tempApproval2.certificate.certificationId,
+            ),
           );
           let tempApproval3 = Object.assign({}, tempApproval2);
           tempApproval3["certification"] = certification;
@@ -302,7 +316,7 @@ app.use(
     const approvalAuthor = await resolvePromise(
       await app.models.StaffCertification.find({
         where: { certificationId: certificationId },
-      })
+      }),
     );
 
     let approvedByOther = [];
@@ -316,14 +330,14 @@ app.use(
       approvedByOther = await resolvePromise(
         await app.models.Approval.find({
           where: { certificateId: id, staffId: author.staffId },
-        })
+        }),
       );
 
       if (approvedByOther.length < 1) {
         let authorDetails = await resolvePromise(
           await app.models.Staff.find({
             where: { _id: author.staffId },
-          })
+          }),
         );
 
         allAwaitingAuthors +=
@@ -338,7 +352,7 @@ app.use(
     const approvedByMe = await resolvePromise(
       await app.models.Approval.find({
         where: { certificateId: id, staffId: req.currentUser.id },
-      })
+      }),
     );
 
     if (approvedByMe.length > 0 && allAwaitingAuthors == "") {
@@ -346,7 +360,7 @@ app.use(
     }
 
     res.status(200).send(result);
-  }
+  },
 );
 
 app.use("/api/pendingapprovalbyothers", async function (req, res) {
@@ -365,7 +379,7 @@ app.use("/api/pendingapprovalbyothers", async function (req, res) {
         const approvalAuthor = await resolvePromise(
           await app.models.StaffCertification.find({
             where: { certificationId: certificate.certificationId },
-          })
+          }),
         );
 
         let approvedByOther = [];
@@ -379,13 +393,13 @@ app.use("/api/pendingapprovalbyothers", async function (req, res) {
           approvedByOther = await resolvePromise(
             await app.models.Approval.find({
               where: { certificateId: certificate.id, staffId: author.staffId },
-            })
+            }),
           );
           if (approvedByOther.length < 1) {
             let authorDetails = await resolvePromise(
               await app.models.Staff.find({
                 where: { _id: author.staffId },
-              })
+              }),
             );
             allAwaitingAuthors +=
               authorDetails[0].firstName + " " + authorDetails[0].lastName;
@@ -406,7 +420,7 @@ app.use("/api/pendingapprovalbyothers", async function (req, res) {
               certificateId: certificate.id,
               staffId: req.currentUser.id,
             },
-          })
+          }),
         );
 
         if (approvedByMe.length > 0 && allAwaitingAuthors != "") {
@@ -434,7 +448,7 @@ app.use("/api/certificate-verification-by-nfc/:id", async function (req, res) {
     const nfcTag = await resolvePromise(
       await app.models.NFCTag.findOne({
         where: { identifier: identifier, isDamaged: false },
-      })
+      }),
     );
 
     console.log(nfcTag);
@@ -447,9 +461,8 @@ app.use("/api/certificate-verification-by-nfc/:id", async function (req, res) {
         certificateId: nfcTag.certificateId,
       };
 
-      const newNfcToken = await app.models.NFCTagVerificationToken.create(
-        dataToSave
-      );
+      const newNfcToken =
+        await app.models.NFCTagVerificationToken.create(dataToSave);
       console.log("newNfcToken");
       console.log(newNfcToken);
       const scanData = {
@@ -470,11 +483,11 @@ app.use("/api/certificate-verification-by-nfc/:id", async function (req, res) {
   }
 });
 
-app.use("/api/sendEmail", function (req, res) {
-  const sgMail = require("@sendgrid/mail");
-  sgMail.setApiKey(
-    "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"
-  );
+app.use("/api/sendEmail", async function (req, res) {
+  // const sgMail = require("@sendgrid/mail");
+  // sgMail.setApiKey(
+  //   "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",
+  // );
   const msg = {
     to: req.body.to,
     from: "noreply@authentific.com.au",
@@ -494,15 +507,11 @@ app.use("/api/sendEmail", function (req, res) {
       "<strong>Regards</strong>,<br>" +
       "<strong>TEAM AUTHENTIFIC</strong>",
   };
-  sgMail.send(msg);
+  const response = await transporter.sendMail(msg);
+  res.status(200).json({ response });
 });
 
-app.use("/api/sendTransactionHistoryToMail", function (req, res) {
-  const sgMail = require("@sendgrid/mail");
-  sgMail.setApiKey(
-    "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"
-  );
-  console.log(req.currentUser);
+app.use("/api/sendTransactionHistoryToMail", async function (req, res) {
   const msg = {
     to: req.currentUser.email,
     from: "noreply@authentific.com.au",
@@ -520,7 +529,7 @@ app.use("/api/sendTransactionHistoryToMail", function (req, res) {
     ],
   };
   try {
-    sgMail.send(msg);
+    await transporter.sendMail(msg);
     res.status(200).json("Mail sent");
   } catch (error) {
     console.log(error);
@@ -528,11 +537,11 @@ app.use("/api/sendTransactionHistoryToMail", function (req, res) {
   }
 });
 
-app.use("/api/sendCertificateToMail", function (req, res) {
-  const sgMail = require("@sendgrid/mail");
-  sgMail.setApiKey(
-    "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"
-  );
+app.use("/api/sendCertificateToMail", async function (req, res) {
+  // const sgMail = require("@sendgrid/mail");
+  // sgMail.setApiKey(
+  //   "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",
+  // );
   let msg;
   if (req.body.type === "jpg") {
     msg = {
@@ -569,7 +578,7 @@ app.use("/api/sendCertificateToMail", function (req, res) {
   }
 
   try {
-    sgMail.send(msg);
+    await transporter.sendMail(msg);
     res.status(200).json("Mail sent successfully");
   } catch (error) {
     console.log(error);
@@ -631,7 +640,7 @@ app.use("/api/login-magic-link", function (req, res) {
               res.json(err);
             });
         } else res.status(400).json("User not found");
-      }
+      },
     );
   } catch (e) {
     console.log(e);
@@ -643,7 +652,7 @@ app.use("/api/login-magic-link", function (req, res) {
   }
 });
 
-app.use("/api/stripe-payment", function (req, res, next) {
+app.use("/api/stripe-payment", async function (req, res, next) {
   const { payment_info, user_info } = req.body;
   try {
     stripe.charges.create(
@@ -663,7 +672,7 @@ app.use("/api/stripe-payment", function (req, res, next) {
         } else {
           app.models.SignupUsers.create(
             { ...user_info, payment_info: charge },
-            function (err, user) {
+            async function (err, user) {
               if (err) {
                 console.log(err);
                 res.status(500).json({
@@ -672,10 +681,10 @@ app.use("/api/stripe-payment", function (req, res, next) {
                   err: err,
                 });
               } else {
-                const sgMail = require("@sendgrid/mail");
-                sgMail.setApiKey(
-                  "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"
-                );
+                // const sgMail = require("@sendgrid/mail");
+                // sgMail.setApiKey(
+                //   "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",
+                // );
                 const governmentIssuedIdContent =
                   user_info.governmentIssuedId.value.split(",")[1];
                 const businessRegistrationCertificateContent =
@@ -747,7 +756,7 @@ app.use("/api/stripe-payment", function (req, res, next) {
                 };
 
                 let msg2 = {
-                  to: "Haroonasghar@hsainternationalgroup.com",
+                  to: "haroonasghar@hsainternationalgroup.com",
                   from: "noreply@authentific.com.au",
                   subject: `New user registered`,
                   html: `Dear Admin,
@@ -811,27 +820,30 @@ app.use("/api/stripe-payment", function (req, res, next) {
                     },
                   ],
                 };
-                sgMail
-                  .send(msg1)
-                  .then((res) => {})
-                  .catch((err) => {
-                    console.log(err, err.response.body);
-                  });
 
-                sgMail
-                  .send(msg2)
-                  .then((res) => {})
-                  .catch((err) => {
-                    console.log(err, err.response.body);
-                  });
+                await transporter.sendMail(msg1);
+                await transporter.sendMail(msg2);
+                // sgMail
+                //   .send(msg1)
+                //   .then((res) => {})
+                //   .catch((err) => {
+                //     console.log(err, err.response.body);
+                //   });
+
+                // sgMail
+                //   .send(msg2)
+                //   .then((res) => {})
+                //   .catch((err) => {
+                //     console.log(err, err.response.body);
+                //   });
               }
-            }
+            },
           );
           res
             .status(200)
             .json({ success: true, message: "Payment completed." });
         }
-      }
+      },
     );
   } catch (e) {
     console.log(e);
