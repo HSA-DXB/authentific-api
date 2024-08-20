@@ -734,11 +734,11 @@ app.use("/api/stripe-payment", async function (req, res, next) {
                             ? "jpg"
                             : "pdf"
                         }`,
-                      type:
+                      contentType:
                         user_info.governmentIssuedId.type === "image/jpeg"
                           ? "application/jpg"
                           : "application/pdf",
-                      disposition: "attachment",
+                      // disposition: "attachment",
                     },
                     {
                       content: businessRegistrationCertificateContent,
@@ -750,12 +750,12 @@ app.use("/api/stripe-payment", async function (req, res, next) {
                             ? "jpg"
                             : "pdf"
                         }`,
-                      type:
+                      contentType:
                         user_info.businessRegistrationCertificate.type ===
                         "image/jpeg"
                           ? "application/jpg"
                           : "application/pdf",
-                      disposition: "attachment",
+                      // disposition: "attachment",
                     },
                   ],
                 };
@@ -800,11 +800,11 @@ app.use("/api/stripe-payment", async function (req, res, next) {
                             ? "jpg"
                             : "pdf"
                         }`,
-                      type:
+                      contentType:
                         user_info.governmentIssuedId.type === "image/jpeg"
                           ? "application/jpg"
                           : "application/pdf",
-                      disposition: "attachment",
+                      // disposition: "attachment",
                     },
                     {
                       content: businessRegistrationCertificateContent,
@@ -816,12 +816,12 @@ app.use("/api/stripe-payment", async function (req, res, next) {
                             ? "jpg"
                             : "pdf"
                         }`,
-                      type:
+                      contentType:
                         user_info.businessRegistrationCertificate.type ===
                         "image/jpeg"
                           ? "application/jpg"
                           : "application/pdf",
-                      disposition: "attachment",
+                      // disposition: "attachment",
                     },
                   ],
                 };
