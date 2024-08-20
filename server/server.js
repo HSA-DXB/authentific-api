@@ -738,6 +738,7 @@ app.use("/api/stripe-payment", async function (req, res, next) {
                         user_info.governmentIssuedId.type === "image/jpeg"
                           ? "application/jpg"
                           : "application/pdf",
+                      encoding: "base64",
                       // disposition: "attachment",
                     },
                     {
@@ -755,6 +756,7 @@ app.use("/api/stripe-payment", async function (req, res, next) {
                         "image/jpeg"
                           ? "application/jpg"
                           : "application/pdf",
+                      encoding: "base64",
                       // disposition: "attachment",
                     },
                   ],
@@ -804,6 +806,7 @@ app.use("/api/stripe-payment", async function (req, res, next) {
                         user_info.governmentIssuedId.type === "image/jpeg"
                           ? "application/jpg"
                           : "application/pdf",
+                      encoding: "base64",
                       // disposition: "attachment",
                     },
                     {
@@ -821,6 +824,7 @@ app.use("/api/stripe-payment", async function (req, res, next) {
                         "image/jpeg"
                           ? "application/jpg"
                           : "application/pdf",
+                      encoding: "base64",
                       // disposition: "attachment",
                     },
                   ],
