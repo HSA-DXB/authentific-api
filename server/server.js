@@ -526,8 +526,9 @@ app.use("/api/sendTransactionHistoryToMail", async function (req, res) {
       {
         content: req.body.pdf,
         filename: "Blockchain Transaction Receipt.pdf",
-        type: "application/pdf",
-        disposition: "attachment",
+        contentType: "application/pdf",
+        encoding: "base64",
+        // disposition: "attachment",
       },
     ],
   };
