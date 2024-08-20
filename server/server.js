@@ -6,32 +6,26 @@ require("dotenv").config();
 var bodyParser = require("body-parser");
 var UAParser = require("ua-parser-js");
 const publicIp = require("public-ip");
-const awaitableCallback = require("../common/awaitableCallback");
-const resolvePromise = require("../common/ResolvePromise");
-const scheduleBackupJob = require("../scheduler/scheduleBackup");
+
 const TokenGenerator = require("uuid-token-generator");
 var app = (module.exports = loopback());
 var http = require("http");
 var GoogleUrl = require("google-url");
 var request = require("request");
 var bodyParser = require("body-parser");
-app.use(bodyParser.json({ limit: "50mb" }));
 const stytch = require("stytch");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const nodemailer = require("nodemailer");
 
-app.use(
-  bodyParser.urlencoded({
-    limit: "50mb",
-    extended: true,
-    parameterLimit: 1000000,
-  }),
-);
-
 const path = require("path");
 
 const fs = require("fs");
+
+const awaitableCallback = require("../common/awaitableCallback");
+const resolvePromise = require("../common/ResolvePromise");
+const scheduleBackupJob = require("../scheduler/scheduleBackup");
+
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = new stytch.Client({
@@ -64,6 +58,15 @@ app.start = function () {
     }
   });
 };
+app.use(bodyParser.json({ limit: "50mb" }));
+
+app.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 1000000,
+  }),
+);
 
 app.use("/api/createShortUrl", function (req, res) {
   var headers = {
@@ -523,8 +526,9 @@ app.use("/api/sendTransactionHistoryToMail", async function (req, res) {
       {
         content: req.body.pdf,
         filename: "Blockchain Transaction Receipt.pdf",
-        type: "application/pdf",
-        disposition: "attachment",
+        contentType: "application/pdf",
+        encoding: "base64",
+        // disposition: "attachment",
       },
     ],
   };
@@ -553,9 +557,10 @@ app.use("/api/sendCertificateToMail", async function (req, res) {
       attachments: [
         {
           content: req.body.pdf,
-          filename: req.body.documentName + ".jpg",
+          filename: req.body.documentName,
           type: "application/jpg",
-          disposition: "attachment",
+          // disposition: "attachment",
+          encoding: "base64",
         },
       ],
     };
@@ -569,16 +574,17 @@ app.use("/api/sendCertificateToMail", async function (req, res) {
       attachments: [
         {
           content: req.body.pdf,
-          filename: req.body.documentName + ".pdf",
-          type: "application/pdf",
-          disposition: "attachment",
+          filename: req.body.documentName,
+          contentType: "application/pdf",
+          encoding: "base64",
+          // disposition: "attachment",
         },
       ],
     };
   }
 
   try {
-    await transporter.sendMail(msg);
+    transporter.sendMail(msg);
     res.status(200).json("Mail sent successfully");
   } catch (error) {
     console.log(error);
@@ -594,7 +600,6 @@ app.use("/api/2FA/verify-token", function (req, res) {
     .services("VA7c8ee0f552059a57254012561686786d")
     .verificationChecks.create({ to: req.body.to, code: req.body.code })
     .then((verification_check) => {
-      console.log(verification_check);
       if (verification_check.status === "approved") {
         // update model field: verified2FA
         res.status(200).json({
