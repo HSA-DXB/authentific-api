@@ -18,6 +18,7 @@ module.exports = function (Staff) {
     stytchClient.magicLinks
       .authenticate(context.req.body.token)
       .then((magicLink) => {
+        console.log("Magic link authentication successful:", magicLink);
         if (magicLink) {
           Staff.find(
             {
@@ -50,6 +51,7 @@ module.exports = function (Staff) {
       })
       .catch((error) => {
         console.log(error);
+        console.log("Magic link authentication failed:", error);
         let err = new Error();
         err.message =
           "The magic link could not be authenticated because it was either already used or expired. Send another magic link to this user.";
@@ -244,8 +246,7 @@ module.exports = function (Staff) {
       yub.init("41713", "NR+uycIuvGoA1Wh/VmF2eGx2CqQ=");
 
       let staff = await Staff.findById(token.userId);
-      // console.log(staff);
-
+      console.log("Staff found:", staff);
       /*
       2FA functionality starts
       */
@@ -258,8 +259,9 @@ module.exports = function (Staff) {
       */
 
       if (staff.requireYubikey) {
+        console.log("Yubikey required for user");
         if (!context.args.credentials.yubikey) {
-          // console.log('Yubikey Missing')
+          console.log("Yubikey missing in credentials");
           let err = new Error();
           err.message = "Yubikey Missing in Auth.";
           err.status = 401;
@@ -268,7 +270,7 @@ module.exports = function (Staff) {
 
         let response = await VerifyYubiKey(context.args.credentials.yubikey);
 
-        // console.log('response from Ubi API', response)
+        console.log("Yubikey verification response:", response);
         if (
           response &&
           response.valid &&
@@ -291,6 +293,7 @@ module.exports = function (Staff) {
     } catch (e) {
       // console.log("printtttttttttttttttttt");
       console.log(e);
+      console.log("Error in afterRemote login hook:", e);
       return next(new Error(e));
     }
   });
