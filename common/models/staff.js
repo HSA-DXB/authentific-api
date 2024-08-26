@@ -25,6 +25,7 @@ module.exports = function (Staff) {
               where: { email: magicLink.user.emails[0].email },
             },
             function (err, staff) {
+              console.log("Staff find result:", staff);
               if (staff) {
                 context.args.credentials = {
                   yubikey: "",
@@ -40,6 +41,7 @@ module.exports = function (Staff) {
               }
 
               if (err) {
+                console.log("Error finding staff:", err);
                 let err = new Error();
                 err.message = "User Not Found";
                 err.status = 400;
