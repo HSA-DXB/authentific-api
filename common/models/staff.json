@@ -1,3 +1,129 @@
+// {
+//   "name": "Staff",
+//   "plural": "Staff",
+//   "base": "User",
+//   "idInjection": true,
+//   "restrictResetPasswordTokenScope": true,
+//   "emailVerificationRequired": false,
+//   "mixins": {
+//     "TimeStamp": true
+//   },
+//   "properties": {
+//     "firstName": {
+//       "type": "string",
+//       "required": true
+//     },
+//     "lastName": {
+//       "type": "string",
+//       "required": true
+//     },
+//     "position": {
+//       "type": "string",
+//       "required": true
+//     },
+//     "type": {
+//       "type": "string",
+//       "required": true
+//     },
+//     "yubikeyId": {
+//       "type": "string"
+//     },
+//     "requireYubikey": {
+//       "type": "Boolean",
+//       "default": false
+//     },
+//     "require2FA": {
+//       "type": "Boolean",
+//       "default": false
+//     },
+//     "numberToUseIn2FA": {
+//       "type": "String",
+//       "default": null
+//     },
+//     "verified2FA": {
+//       "type": "Boolean",
+//       "default": false
+//     },
+//     "blockchainAddress": {
+//       "type": "String",
+//       "default": null
+//     },
+//     "stytchData": {
+//       "type": "object",
+//       "required": false
+//     }
+
+//   },
+//   "validations": [],
+//   "relations": {
+//     "accessTokens": {
+//       "type": "hasMany",
+//       "model": "AccessToken",
+//       "foreignKey": "userId",
+//       "options": {
+//         "disableInclude": true
+//       }
+//     },
+//     "certifications": {
+//       "type": "hasMany",
+//       "model": "Certification",
+//       "foreignKey": "staffId",
+//       "options": {
+//         "nestRemoting": true
+//       },
+//       "through": "StaffCertification"
+//     },
+//     "activityLogs": {
+//       "type": "hasMany",
+//       "model": "ActivityLog",
+//       "foreignKey": "staffId",
+//       "options": {
+//         "nestRemoting": true
+//       }
+//     },
+//     "certificates": {
+//       "type": "hasMany",
+//       "model": "Certificate",
+//       "foreignKey": "staffId",
+//       "options": {
+//         "nestRemoting": true
+//       },
+//       "through": "Approval"
+//     },
+//     "staffCategory": {
+//       "type": "belongsTo",
+//       "model": "StaffCategory",
+//       "foreignKey": "staffCategoryId",
+//       "options": {
+//         "nestRemoting": true
+//       }
+//     },
+//     "institute": {
+//       "type": "belongsTo",
+//       "model": "Institute",
+//       "foreignKey": "instituteId",
+//       "options": {
+//         "nestRemoting": true
+//       }
+//     }
+//   },
+//   "acls": [
+//     {
+//       "accessType": "READ",
+//       "principalType": "ROLE",
+//       "principalId": "$everyone",
+//       "permission": "ALLOW"
+//     },
+//     {
+//       "accessType": "WRITE",
+//       "principalType": "ROLE",
+//       "principalId": "$everyone",
+//       "permission": "ALLOW"
+//     }
+//   ],
+//   "methods": {}
+// }
+
 {
   "name": "Staff",
   "plural": "Staff",
@@ -52,7 +178,6 @@
       "type": "object",
       "required": false
     }
-
   },
   "validations": [],
   "relations": {
