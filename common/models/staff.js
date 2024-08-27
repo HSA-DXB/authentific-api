@@ -350,7 +350,7 @@ module.exports = function (Staff) {
     if (credentials.token) {
       try {
         const magicLink = await stytchClient.magicLinks.authenticate(
-          credentials.stytchToken
+          credentials.token
         );
         if (magicLink) {
           const staff = await Staff.findOne({
@@ -379,11 +379,7 @@ module.exports = function (Staff) {
         throw err;
       }
     } else if (credentials.email && credentials.password) {
-      const user = await User.findOne({
-        email: credentials.email,
-        password: credentials.password,
-      });
-      return user;
+      return User.login.call(self, credentials, include);
     } else {
       const err = new Error("Invalid login credentials");
       err.statusCode = 401;
