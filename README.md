@@ -2,11 +2,11 @@
 
 ## About
 
-__Description__:
+**Description**:
 
 A Base docker project to get up and running with [Loopback](http://loopback.io) and [MySQL](https://www.mysql.com/). This project also includes boot scripts located in `server/boot` to automatically do database migration/update so that you can move a bit quicker with your schema, tables, and data structures. Apart from the migration scripts this project is a fresh sheet of ice, in that, there are no models, widgets, relations, or permissions set up.
 
-__Tech Specifications__:
+**Tech Specifications**:
 
 Node: `6.11.1` -> Latest LTS: Boron
 StrongLoop: `3.x`
@@ -14,11 +14,11 @@ MySQL: `5.6` -> [Amazon Aurora DB](https://aws.amazon.com/rds/aurora/) drop-in a
 
 ## Install/Set Up
 
-__Prerequisites__:
+**Prerequisites**:
 
 You need to have both [docker](https://docs.docker.com/engine/installation/) and [docker-compose](https://docs.docker.com/compose/install/) installed.
 
-__Notes__:
+**Notes**:
 
 Number one, I've created a make file to make life a bit easier. Number two, if you wish to do a complete fresh install, as in, remove all the current loopback scaffolding you can do so via:
 
@@ -29,7 +29,7 @@ Number one, I've created a make file to make life a bit easier. Number two, if y
    make setup-loopback
 ```
 
-__1) Install Dependencies__:
+**1) Install Dependencies**:
 
 First task of business is to install the npm dependencies:
 
@@ -39,7 +39,7 @@ First task of business is to install the npm dependencies:
    make install-deps
 ```
 
-__2) Start docker-compose__
+**2) Start docker-compose**
 
 Last task of business is to boot up the docker containers:
 
@@ -47,10 +47,9 @@ Last task of business is to boot up the docker containers:
    make start # runs -> docker-compose up
 ```
 
-__3) Open Browser__
+**3) Open Browser**
 
 To make sure everything worked according to plan open open [`localhost:3002`](http://localhost:3002/). It should display a simple JSON Object with a `"started"` and `"uptime"` property. To view the api cruz on over to [`localhost:3002/explorer/`](http://localhost:3002/explorer/).
-
 
 ## Create Model
 
@@ -72,26 +71,24 @@ You can also do a db migration via `/__scripts__/migrate.js` and like the automa
 
 There are a few Makefile commands to make life a bit easier. Nothing magical just a wrapper around `docker-compose run api lb`. You must pass an argument to the `api` and `model` command.
 
-__api__
+**api**
 
 ```bash
    make api a=middleware
    make api a='Model Widget'
 ```
 
-__model__
+**model**
 
 ```bash
    make model a=Widget
 ```
 
-
-__Relation -> (no arguments)__
+**Relation -> (no arguments)**
 
 ```bash
    make relation
 ```
-
 
 ## Debug Node
 
@@ -111,7 +108,74 @@ api:
 
 The MySQL docker image is setup via `environment` variables to set up the the db. These variables are set in the root `.env` file. Remember, these variables must correspond with `/server/datasources.json`.
 
+# Deployment Guide for Authentific API
 
----
+## Adding SSH Key
 
-Best, te
+To securely access your DigitalOcean Droplet, you need to add your SSH key. Follow the instructions in the official DigitalOcean documentation: [How to Add SSH Keys](https://docs.digitalocean.com/products/droplets/how-to/add-ssh-keys/).
+
+## Deployment Steps
+
+1. **Log into DigitalOcean**
+
+   - Go to your DigitalOcean account and navigate to the Droplet named `authentific-api-new`.
+
+2. **SSH into the Server**
+
+   - Click on the IPv4 address of your Droplet.
+   - Open your terminal and connect to the server using:
+     ```bash
+     ssh root@<your_ipv4_address>
+     ```
+
+3. **Navigate to the Project Directory**
+
+   - Once logged in, navigate to the project directory:
+     ```bash
+     cd /var/www/html/authentific-api-develop
+     ```
+
+4. **Pull the Latest Code**
+
+   - Update your codebase by pulling the latest changes from your repository:
+     ```bash
+     git pull
+     ```
+
+5. **Check Node Version**
+
+   - Before installing new modules, check the current Node.js version:
+     ```bash
+     node -v
+     ```
+   - If you encounter any issues related to the Node.js version, use NVM (Node Version Manager) to switch to the required version.
+
+6. **Using NVM**
+
+   - If NVM is not recognized, run the following command to load it:
+     ```bash
+     source ~/.bashrc
+     ```
+
+7. **Install Node Modules**
+
+   - After ensuring the correct Node.js version, install the necessary modules:
+     ```bash
+     npm install
+     ```
+
+8. **Run the Application in the Background**
+
+   - We use PM2 to manage the Node.js process in the background. The API runs on port 80.
+   - Check the running processes with:
+     ```bash
+     pm2 list
+     ```
+
+9. **Restart the Process**
+   - Identify the application name or ID (e.g., `server` or ID `11`) and restart the process:
+     ```bash
+     pm2 restart <app_name_or_id>
+     ```
+
+Now your Authentific API should be up and running on your DigitalOcean Droplet!
