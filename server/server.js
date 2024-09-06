@@ -15,9 +15,8 @@ var request = require("request");
 var bodyParser = require("body-parser");
 const stytch = require("stytch");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-
 const nodemailer = require("nodemailer");
-
+const axios = require("axios");
 const path = require("path");
 
 const fs = require("fs");
@@ -65,7 +64,7 @@ app.use(
     limit: "50mb",
     extended: true,
     parameterLimit: 1000000,
-  }),
+  })
 );
 
 app.use("/api/createShortUrl", function (req, res) {
@@ -187,15 +186,41 @@ app.use(async function (req, res, next) {
             });
 
             next();
-          },
+          }
         );
-      },
+      }
     );
   }
 
   // If no tokenId was found, continue without waiting
   else {
     next();
+  }
+});
+
+const { URL } = require("url");
+
+app.get("/api/url-to-image", async function (req, res) {
+  const imageUrl = req.query.url;
+  if (!imageUrl) {
+    return res.status(400).send("Image URL is required");
+  }
+
+  try {
+    // Validate and parse the URL
+    const parsedUrl = new URL(imageUrl.toString());
+
+    const response = await axios.get(parsedUrl.href, {
+      responseType: "stream",
+    });
+
+    const contentType = response.headers["content-type"];
+
+    res.set("Content-Type", contentType);
+    response.data.pipe(res);
+  } catch (error) {
+    console.error("Error fetching image:", error);
+    res.status(500).send("Error fetching image");
   }
 });
 
@@ -215,7 +240,7 @@ app.use("/api/getwaitingformyapproval", async function (req, res) {
               certificateId: certificate.id,
               staffId: req.currentUser.id,
             },
-          }),
+          })
         );
 
         if (!approvedByMe || approvedByMe.length < 1) {
@@ -230,17 +255,17 @@ app.use("/api/getwaitingformyapproval", async function (req, res) {
 app.use("/api/checkRemainingCertificateApproval", async function (req, res) {
   const certificateId = req.body.certificateId;
   const certificate = await resolvePromise(
-    await app.models.Certificate.findById(certificateId),
+    await app.models.Certificate.findById(certificateId)
   );
   const staffCertifications = await resolvePromise(
     await app.models.StaffCertification.find({
       where: { certificationId: certificate.certificationId },
-    }),
+    })
   );
   const approvals = await resolvePromise(
     await app.models.Approval.find({
       where: { certificateId: certificateId },
-    }),
+    })
   );
   // console.log(staffCertifications.length, approvals.length)
   if (staffCertifications.length === approvals.length) {
@@ -264,16 +289,16 @@ async function handleCertificates(approvals, req, res) {
 
       let certificate = await resolvePromise(
         await app.models.Approval.relations.certificate.modelTo.findById(
-          approval.certificateId,
-        ),
+          approval.certificateId
+        )
       );
 
       tempApproval1["certificate"] = certificate;
       if (tempApproval1.certificate !== null) {
         let candidate = await resolvePromise(
           await app.models.Certificate.relations.candidate.modelTo.findById(
-            tempApproval1.certificate.candidateId,
-          ),
+            tempApproval1.certificate.candidateId
+          )
         );
         {
           let tempApproval2 = Object.assign({}, tempApproval1);
@@ -282,8 +307,8 @@ async function handleCertificates(approvals, req, res) {
 
           let certification = await resolvePromise(
             await app.models.Certificate.relations.certification.modelTo.findById(
-              tempApproval2.certificate.certificationId,
-            ),
+              tempApproval2.certificate.certificationId
+            )
           );
           let tempApproval3 = Object.assign({}, tempApproval2);
           tempApproval3["certification"] = certification;
@@ -319,7 +344,7 @@ app.use(
     const approvalAuthor = await resolvePromise(
       await app.models.StaffCertification.find({
         where: { certificationId: certificationId },
-      }),
+      })
     );
 
     let approvedByOther = [];
@@ -333,14 +358,14 @@ app.use(
       approvedByOther = await resolvePromise(
         await app.models.Approval.find({
           where: { certificateId: id, staffId: author.staffId },
-        }),
+        })
       );
 
       if (approvedByOther.length < 1) {
         let authorDetails = await resolvePromise(
           await app.models.Staff.find({
             where: { _id: author.staffId },
-          }),
+          })
         );
 
         allAwaitingAuthors +=
@@ -355,7 +380,7 @@ app.use(
     const approvedByMe = await resolvePromise(
       await app.models.Approval.find({
         where: { certificateId: id, staffId: req.currentUser.id },
-      }),
+      })
     );
 
     if (approvedByMe.length > 0 && allAwaitingAuthors == "") {
@@ -363,7 +388,7 @@ app.use(
     }
 
     res.status(200).send(result);
-  },
+  }
 );
 
 app.use("/api/pendingapprovalbyothers", async function (req, res) {
@@ -382,7 +407,7 @@ app.use("/api/pendingapprovalbyothers", async function (req, res) {
         const approvalAuthor = await resolvePromise(
           await app.models.StaffCertification.find({
             where: { certificationId: certificate.certificationId },
-          }),
+          })
         );
 
         let approvedByOther = [];
@@ -396,13 +421,13 @@ app.use("/api/pendingapprovalbyothers", async function (req, res) {
           approvedByOther = await resolvePromise(
             await app.models.Approval.find({
               where: { certificateId: certificate.id, staffId: author.staffId },
-            }),
+            })
           );
           if (approvedByOther.length < 1) {
             let authorDetails = await resolvePromise(
               await app.models.Staff.find({
                 where: { _id: author.staffId },
-              }),
+              })
             );
             allAwaitingAuthors +=
               authorDetails[0].firstName + " " + authorDetails[0].lastName;
@@ -423,7 +448,7 @@ app.use("/api/pendingapprovalbyothers", async function (req, res) {
               certificateId: certificate.id,
               staffId: req.currentUser.id,
             },
-          }),
+          })
         );
 
         if (approvedByMe.length > 0 && allAwaitingAuthors != "") {
@@ -451,7 +476,7 @@ app.use("/api/certificate-verification-by-nfc/:id", async function (req, res) {
     const nfcTag = await resolvePromise(
       await app.models.NFCTag.findOne({
         where: { identifier: identifier, isDamaged: false },
-      }),
+      })
     );
 
     console.log(nfcTag);
@@ -464,8 +489,9 @@ app.use("/api/certificate-verification-by-nfc/:id", async function (req, res) {
         certificateId: nfcTag.certificateId,
       };
 
-      const newNfcToken =
-        await app.models.NFCTagVerificationToken.create(dataToSave);
+      const newNfcToken = await app.models.NFCTagVerificationToken.create(
+        dataToSave
+      );
       console.log("newNfcToken");
       console.log(newNfcToken);
       const scanData = {
@@ -645,7 +671,7 @@ app.use("/api/login-magic-link", function (req, res) {
               res.json(err);
             });
         } else res.status(400).json("User not found");
-      },
+      }
     );
   } catch (e) {
     console.log(e);
@@ -846,13 +872,13 @@ app.use("/api/stripe-payment", async function (req, res, next) {
                 //     console.log(err, err.response.body);
                 //   });
               }
-            },
+            }
           );
           res
             .status(200)
             .json({ success: true, message: "Payment completed." });
         }
-      },
+      }
     );
   } catch (e) {
     console.log(e);

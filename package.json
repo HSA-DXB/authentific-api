@@ -22,6 +22,7 @@
   "dependencies": {
     "@sendgrid/mail": "^6.4.0",
     "aws-sdk": "^2.610.0",
+    "axios": "^1.7.7",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
     "dropbox-v2-api": "^2.4.19",
