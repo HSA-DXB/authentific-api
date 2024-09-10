@@ -74,13 +74,13 @@
     },
     "isBlockchainUser": {
       "type": "Boolean",
-      "default": true,
-      "required": true
+      "required": true,
+      "default": true
     },
     "isAuthentificUser": {
       "type": "Boolean",
-      "default": false,
-      "required": true
+      "required": true,
+      "default": false
     },
     "font": {
       "type": "string",

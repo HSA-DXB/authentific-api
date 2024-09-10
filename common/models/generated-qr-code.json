@@ -1,0 +1,96 @@
+{
+  "name": "GeneratedQrCode",
+  "plural": "CertificateQRCode",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": true
+  },
+  "properties": {
+    "verificationUrl": {
+      "type": "string",
+      "required": false
+    },
+    "isApproved": {
+      "type": "Boolean"
+    },
+    "isVoid": {
+      "type": "Boolean",
+      "default": false
+    },
+    "isPrinted": {
+      "type": "Boolean",
+      "default": false
+    },
+    "isReportGenerated": {
+      "type": "Boolean",
+      "default": false
+    },
+    "pin": {
+      "type": "string",
+      "required": false
+    },
+    "identifier": {
+      "type": "string"
+    },
+    "print": {
+      "type": "string",
+      "required": false,
+      "mysql": {
+        "columnName": "Template",
+        "dataType": "LONGTEXT",
+        "nullable": "N"
+      }
+    },
+    "googleFonts": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {
+    "candidate": {
+      "type": "belongsTo",
+      "model": "Candidate",
+      "foreignKey": "candidateId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "certification": {
+      "type": "belongsTo",
+      "model": "Certification",
+      "foreignKey": "certificationId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "institute": {
+      "type": "belongsTo",
+      "model": "Institute",
+      "foreignKey": "instituteId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "verifications": {
+      "type": "hasMany",
+      "model": "Verification",
+      "foreignKey": "",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

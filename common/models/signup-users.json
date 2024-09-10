@@ -43,10 +43,12 @@
       "type": "string",
       "required": true
     },
-    "paymentInfo": {}
+    "paymentInfo": {
+      "type": {}
+    }
   },
   "validations": [],
-
+  "relations": {},
   "acls": [],
   "methods": {}
 }

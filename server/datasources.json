@@ -9,11 +9,11 @@
     "url": "",
     "database": "authentificapi",
     "password": "",
-    "name": "",
+    "name": "mongoDB",
     "user": "",
     "connector": "mongodb",
     "useNewUrlParser": "true",
-    "useUnifiedTopology":"true"
+    "useUnifiedTopology": "true"
   },
   "storage": {
     "name": "storage",

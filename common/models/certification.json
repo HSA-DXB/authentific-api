@@ -50,7 +50,6 @@
   },
   "validations": [],
   "relations": {
-    
     "candidates": {
       "type": "hasMany",
       "model": "Candidate",

@@ -23,20 +23,20 @@
     },
     "isAssigned": {
       "type": "Boolean",
-      "default":false
+      "default": false
     },
     "isDamaged": {
       "type": "Boolean",
-      "default":false
+      "default": false
     },
     "isDamagedReason": {
       "type": "string",
       "required": false,
-      "default":""
+      "default": ""
     },
     "shortUrlInfo": {
       "type": "Object",
-      "required":false
+      "required": false
     }
   },
   "validations": [],

@@ -106,5 +106,9 @@
   "SignupUsers": {
     "dataSource": "mongoDB",
     "public": true
+  },
+  "GeneratedQrCode": {
+    "dataSource": "mongoDB",
+    "public": true
   }
 }

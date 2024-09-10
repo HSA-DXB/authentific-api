@@ -33,6 +33,7 @@
     }
   },
   "validations": [],
+  "relations": {},
   "acls": [
     {
       "principalType": "ROLE",
