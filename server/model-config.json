@@ -110,5 +110,13 @@
   "GeneratedQrCode": {
     "dataSource": "mongoDB",
     "public": true
+  },
+  "TestModel": {
+    "dataSource": "mongoDB",
+    "public": true
+  },
+  "GenerateCertificateQRCode": {
+    "dataSource": "mongoDB",
+    "public": true
   }
 }

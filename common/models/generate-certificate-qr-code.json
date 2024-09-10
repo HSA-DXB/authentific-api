@@ -1,37 +1,29 @@
 {
-  "name": "GeneratedQrCode",
-  "plural": "CertificateQRCode",
+  "name": "GenerateCertificateQRCode",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
-  "mixins": {
-    "TimeStamp": true
-  },
   "properties": {
     "verificationUrl": {
-      "type": "string",
-      "required": false
+      "type": "string"
     },
     "isApproved": {
-      "type": "Boolean"
+      "type": "boolean"
     },
     "isVoid": {
-      "type": "Boolean",
-      "default": false
+      "type": "boolean"
     },
     "isPrinted": {
-      "type": "Boolean",
-      "default": false
+      "type": "boolean"
     },
     "isReportGenerated": {
-      "type": "Boolean",
-      "default": false
+      "type": "boolean"
     },
     "pin": {
       "type": "string",
-      "required": false
+      "required": true
     },
     "identifier": {
       "type": "string"
@@ -52,12 +44,6 @@
   },
   "validations": [],
   "relations": {},
-  "acls": [
-    {
-      "principalType": "ROLE",
-      "principalId": "$everyone",
-      "permission": "ALLOW"
-    }
-  ],
+  "acls": [],
   "methods": {}
 }

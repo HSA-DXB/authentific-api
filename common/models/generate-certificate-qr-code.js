@@ -1,9 +1,8 @@
 "use strict";
 var Uuid = require("uuid/v4");
-const QRCode = require("qrcode");
-const resolvePromise = require("../ResolvePromise");
+var QRCode = require("qrcode");
 
-module.exports = function (Generatedqrcode) {
+module.exports = function (Generatecertificateqrcode) {
   function randomStringFromGuid(uid, limit) {
     var chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz123456789";
     var string_length = limit;
@@ -14,7 +13,8 @@ module.exports = function (Generatedqrcode) {
     }
     return randomstring;
   }
-  Generatedqrcode.observe("before save", function (ctx, next) {
+
+  Generatecertificateqrcode.observe("before save", function (ctx, next) {
     if (ctx.isNewInstance) {
       const uuid = Uuid();
       ctx.instance.identifier = randomStringFromGuid(uuid, 8);
@@ -23,12 +23,15 @@ module.exports = function (Generatedqrcode) {
     next();
   });
 
-  Generatedqrcode.afterRemote("create", function (ctx, instance, next) {
-    const qrData = `Identifier: ${instance.identifier}, PIN: ${instance.pin}`;
-    QRCode.toDataURL(qrData, function (err, url) {
-      if (err) return next(err);
-      ctx.res.setHeader("Content-Type", "image/png");
-      ctx.res.send(Buffer.from(url.split(",")[1], "base64"));
-    });
-  });
+  Generatecertificateqrcode.afterRemote(
+    "create",
+    function (ctx, instance, next) {
+      const qrData = `Identifier: ${instance.identifier}, PIN: ${instance.pin}`;
+      QRCode.toDataURL(qrData, function (err, url) {
+        if (err) return next(err);
+        ctx.res.setHeader("Content-Type", "image/png");
+        ctx.res.send(Buffer.from(url.split(",")[1], "base64"));
+      });
+    }
+  );
 };

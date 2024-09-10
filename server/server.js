@@ -47,10 +47,10 @@ const transporter = nodemailer.createTransport({
 app.start = function () {
   scheduleBackupJob();
   // start the web server
-  return app.listen(function () {
+  return app.listen(4000, function () {
     app.emit("started");
     var baseUrl = app.get("url").replace(/\/$/, "");
-    // console.log('Authentific is listening at: %s', baseUrl);
+    console.log("Authentific is listening at: %s", baseUrl);
     if (app.get("loopback-component-explorer")) {
       var explorerPath = app.get("loopback-component-explorer").mountPath;
       // console.log('Browse Authentific Api at %s%s', baseUrl, explorerPath);
