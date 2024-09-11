@@ -43,7 +43,17 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "approvals": {
+      "type": "hasMany",
+      "model": "Staff",
+      "foreignKey": "certificatedId",
+      "options": {
+        "nestRemoting": true
+      },
+      "through": "Approval"
+    }
+  },
   "acls": [],
   "methods": {}
 }

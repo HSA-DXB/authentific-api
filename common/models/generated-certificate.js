@@ -18,35 +18,6 @@ module.exports = function (Certificate) {
     return randomstring;
   }
 
-  Certificate.generateQrCode = async function (
-    candidateId,
-    certificateId,
-    instituteId
-  ) {
-    const uuid = Uuid();
-    const pin = randomStringFromGuid(uuid, 5);
-    const certificateData = {
-      candidateId,
-      certificateId,
-      instituteId,
-      identifier: uuid,
-      pin,
-      isPrinted: false,
-      isVoided: false,
-      isApproved: false,
-    };
-
-    const certificate = await Certificate.create(certificateData);
-
-    const qrCodeData = `${process.env.AUTHENTIFIC_WEB_URL}/certificate-preview?identifier=${certificateData.identifier}&pin=${certificateData.pin}`;
-
-    // Generate QR code as an image buffer
-    const qrCodeBuffer = await QRCode.toBuffer(qrCodeData, { type: "png" });
-
-    // Return to prevent further processing
-    return qrCodeBuffer;
-  };
-
   Certificate.observe("before save", function (ctx, next) {
     var uuid = Uuid();
     if (
@@ -73,24 +44,6 @@ module.exports = function (Certificate) {
     if (!ctx.instance || !ctx.instance.identifier) {
       next();
     }
-  });
-
-  Certificate.remoteMethod("generateQrCode", {
-    accepts: [
-      { arg: "candidateId", type: "string", required: true },
-      { arg: "certificateId", type: "string", required: true },
-      { arg: "instituteId", type: "string", required: true },
-      { arg: "options", type: "object", http: "optionsFromRequest" },
-    ],
-    returns: {
-      arg: "data",
-      type: "Buffer",
-      root: true,
-    },
-    http: {
-      path: "/generate-qr-code",
-      verb: "post",
-    },
   });
 
   Certificate.afterRemote("create", async function (ctx, instance, next) {
