@@ -48,6 +48,10 @@
     "googleFonts": {
       "type": "string",
       "required": false
+    },
+    "isExternalCreation": {
+      "type": "Boolean",
+      "default": false
     }
   },
   "validations": [],
