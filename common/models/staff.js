@@ -239,7 +239,7 @@ module.exports = function (Staff) {
   };
 
   Staff.login = async function (credentials, include, callback) {
-    const User = Staff.app.models.User;
+    const User = app.models.User;
     const self = this;
     console.log("==========login===========");
     console.log(credentials);
@@ -290,16 +290,20 @@ module.exports = function (Staff) {
         err.statusCode = 400;
         throw err;
       }
-      // Check if staff user exists and password matches
-      if (!staff || !(await staff.validatePassword(credentials.password))) {
-        return res.status(401).send("Invalid email or password.");
+      const isPasswordValid = await staff.hasPassword(credentials.password);
+      if (!isPasswordValid) {
+        const err = new Error("Invalid email or password");
+        err.statusCode = 401;
+        throw err;
       }
 
       // Generate a token for the authenticated user
-      const token = await staff.generateAccessToken();
+      const token = await staff.createAccessToken();
+
       if (include === "user") {
         token.__data.user = staff;
       }
+
       return token;
       // return User.login.call(self, credentials, include);
       // next();
