@@ -238,6 +238,78 @@ module.exports = function (Staff) {
     }
   };
 
+  Staff.login = async function (credentials, include, callback) {
+    const User = Staff.app.models.User;
+    const self = this;
+    console.log("==========login===========");
+    console.log(credentials);
+
+    if (credentials.token) {
+      try {
+        const magicLink = await stytchClient.magicLinks.authenticate(
+          credentials.token
+        );
+        if (magicLink) {
+          const staff = await Staff.findOne({
+            where: { email: magicLink.user.emails[0].email },
+          });
+
+          if (!staff) {
+            const err = new Error("User Not Found");
+            err.statusCode = 400;
+            throw err;
+          }
+
+          // Create and return the access token without checking the password
+          const token = await staff.createAccessToken(credentials.ttl);
+          if (include === "user") {
+            token.__data.user = staff;
+          }
+          return token;
+        }
+      } catch (error) {
+        const err = new Error(
+          "The magic link could not be authenticated because it was either already used or expired. Send another magic link to this user."
+        );
+        err.statusCode = 400;
+        throw err;
+      }
+    } else if (credentials.email && credentials.password) {
+      if (!credentials.email || !credentials.password) {
+        const err = new Error("Invalid login credentials");
+        err.statusCode = 401;
+        throw err;
+      }
+
+      const staff = await Staff.findOne({
+        where: { email: credentials.email },
+      });
+
+      if (!staff) {
+        const err = new Error("User Not Found");
+        err.statusCode = 400;
+        throw err;
+      }
+      // Check if staff user exists and password matches
+      if (!staff || !(await staff.validatePassword(password))) {
+        return res.status(401).send("Invalid email or password.");
+      }
+
+      // Generate a token for the authenticated user
+      const token = await staff.generateAccessToken();
+      if (include === "user") {
+        token.__data.user = staff;
+      }
+      return token;
+      // return User.login.call(self, credentials, include);
+      // next();
+    } else {
+      const err = new Error("Invalid login credentials");
+      err.statusCode = 401;
+      throw err;
+    }
+  };
+
   Staff.afterRemote("login", async function (context, token, next) {
     // console.log('hello world')
     try {
@@ -342,50 +414,6 @@ module.exports = function (Staff) {
       return next(new Error(e));
     }
   });
-
-  Staff.login = async function (credentials, include, callback) {
-    const User = Staff.app.models.User;
-    const self = this;
-
-    if (credentials.token) {
-      try {
-        const magicLink = await stytchClient.magicLinks.authenticate(
-          credentials.token
-        );
-        if (magicLink) {
-          const staff = await Staff.findOne({
-            where: { email: magicLink.user.emails[0].email },
-          });
-
-          if (!staff) {
-            const err = new Error("User Not Found");
-            err.statusCode = 400;
-            throw err;
-          }
-
-          // Create and return the access token without checking the password
-          const token = await staff.createAccessToken(credentials.ttl);
-          if (include === "user") {
-            token.__data.user = staff;
-          }
-          return token;
-        }
-      } catch (error) {
-        console.log(error);
-        const err = new Error(
-          "The magic link could not be authenticated because it was either already used or expired. Send another magic link to this user."
-        );
-        err.statusCode = 400;
-        throw err;
-      }
-    } else if (credentials.email && credentials.password) {
-      return User.login.call(self, credentials, include);
-    } else {
-      const err = new Error("Invalid login credentials");
-      err.statusCode = 401;
-      throw err;
-    }
-  };
 
   // Register the custom login method
   Staff.remoteMethod("login", {
