@@ -291,7 +291,7 @@ module.exports = function (Staff) {
         throw err;
       }
       // Check if staff user exists and password matches
-      if (!staff || !(await staff.validatePassword(password))) {
+      if (!staff || !(await staff.validatePassword(credentials.password))) {
         return res.status(401).send("Invalid email or password.");
       }
 
