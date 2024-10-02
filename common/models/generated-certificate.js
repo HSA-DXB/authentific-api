@@ -55,16 +55,16 @@ module.exports = function (Certificate) {
           certificateId: instance.id,
           instituteId: instance.instituteId,
         });
-        // console.log('res in creating approval from generating certificate', res)
-        return;
-      } else {
-        // console.log('Updated certificate', instance.id);
         // Update the newly created certificate with createdBy field
         await Certificate.updateAll(
           { id: instance.id },
           { createdBy: ctx.req.currentUser.id }
         );
         console.log("Updated certificate with createdBy:", instance.id);
+        // console.log('res in creating approval from generating certificate', res)
+        return;
+      } else {
+        // console.log('Updated certificate', instance.id);
       }
     } catch (e) {
       console.log("Exception in generated Certificated", e);
