@@ -39,6 +39,7 @@ module.exports = function (Certificate) {
     ) {
       ctx.data.identifier = uuid;
       ctx.data.pin = randomStringFromGuid(uuid, 5);
+      ctx.data.createdBy = ctx.req.currentUser.id;
       // console.log('creating certificate ctx.data', ctx.data);
     }
     if (!ctx.instance || !ctx.instance.identifier) {
@@ -53,7 +54,6 @@ module.exports = function (Certificate) {
           staffId: ctx.req.currentUser.id,
           certificateId: instance.id,
           instituteId: instance.instituteId,
-          createdBy: ctx.req.currentUser.id,
         });
         // console.log('res in creating approval from generating certificate', res)
         return;
