@@ -89,6 +89,14 @@
       },
       "through": "Approval"
     },
+    "generatedCertificates": {
+      "type": "hasMany",
+      "model": "Certificate",
+      "foreignKey": "createdBy",
+      "options": {
+        "nestRemoting": true
+      }
+    },
     "staffCategory": {
       "type": "belongsTo",
       "model": "StaffCategory",

@@ -53,6 +53,7 @@ module.exports = function (Certificate) {
           staffId: ctx.req.currentUser.id,
           certificateId: instance.id,
           instituteId: instance.instituteId,
+          createdBy: ctx.req.currentUser.id,
         });
         // console.log('res in creating approval from generating certificate', res)
         return;

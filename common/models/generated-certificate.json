@@ -52,6 +52,10 @@
     "isExternalCreation": {
       "type": "Boolean",
       "default": false
+    },
+    "createdBy": {
+      "type": "string",
+      "required": true
     }
   },
   "validations": [],
@@ -101,6 +105,14 @@
       "type": "hasOne",
       "model": "NFCTag",
       "foreignKey": "certificateId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "staff": {
+      "type": "belongsTo",
+      "model": "Staff",
+      "foreignKey": "createdBy",
       "options": {
         "nestRemoting": true
       }
