@@ -39,7 +39,7 @@ module.exports = function (Certificate) {
     ) {
       ctx.data.identifier = uuid;
       ctx.data.pin = randomStringFromGuid(uuid, 5);
-      ctx.data.createdBy = ctx.req.currentUser.id;
+
       // console.log('creating certificate ctx.data', ctx.data);
     }
     if (!ctx.instance || !ctx.instance.identifier) {
@@ -59,6 +59,12 @@ module.exports = function (Certificate) {
         return;
       } else {
         // console.log('Updated certificate', instance.id);
+        // Update the newly created certificate with createdBy field
+        await Certificate.updateAll(
+          { id: instance.id },
+          { createdBy: ctx.req.currentUser.id }
+        );
+        console.log("Updated certificate with createdBy:", instance.id);
       }
     } catch (e) {
       console.log("Exception in generated Certificated", e);
