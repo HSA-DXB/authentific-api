@@ -4,17 +4,12 @@
     "connector": "memory"
   },
   "mongoDB": {
-    "host": "localhost",
-    "port": 27017,
-    "url": "",
-    "database": "authentificapi",
-    "password": "",
-    "name": "mongoDB",
-    "user": "",
-    "connector": "mongodb",
-    "useNewUrlParser": "true",
-    "useUnifiedTopology": "true"
-  },
+  "name": "mongoDB",
+  "connector": "mongodb",
+  "url": "mongodb+srv://<USERNAME>:<PASSWORD>@<CLUSTER_URL>/<DATABASE>?retryWrites=true&w=majority",
+  "useNewUrlParser": true,
+  "useUnifiedTopology": true
+},
   "storage": {
     "name": "storage",
     "connector": "loopback-component-storage",
