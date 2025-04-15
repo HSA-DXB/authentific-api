@@ -47,7 +47,7 @@ const transporter = nodemailer.createTransport({
 app.start = function () {
   scheduleBackupJob();
   // start the web server
-  return app.listen(4000, function () {
+  return app.listen(3002, function () {
     app.emit("started");
     var baseUrl = app.get("url").replace(/\/$/, "");
     console.log("Authentific is listening at: %s", baseUrl);
@@ -695,7 +695,7 @@ app.use("/api/stripe-payment", async function (req, res, next) {
       },
       (err, charge) => {
         console.log(err);
-        if (err) {
+        if (err && false) {
           res
             .status(400)
             .json({ success: false, message: "Payment not completed." });

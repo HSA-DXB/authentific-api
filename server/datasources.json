@@ -6,7 +6,7 @@
   "mongoDB": {
   "name": "mongoDB",
   "connector": "mongodb",
-  "url": "mongodb+srv://<USERNAME>:<PASSWORD>@<CLUSTER_URL>/<DATABASE>?retryWrites=true&w=majority",
+  "url": "mongodb+srv://vigin:Qwerty123@authentific.py21sch.mongodb.net/authentific-staging?retryWrites=true&w=majority",
   "useNewUrlParser": true,
   "useUnifiedTopology": true
 },

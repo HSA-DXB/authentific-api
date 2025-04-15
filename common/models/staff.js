@@ -239,7 +239,6 @@ module.exports = function (Staff) {
   };
 
   Staff.login = async function (credentials, include, callback) {
-    const User = app.models.User;
     const self = this;
     console.log("==========login===========");
     console.log(credentials);
